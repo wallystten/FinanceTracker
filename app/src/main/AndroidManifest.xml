@@ -9,6 +9,7 @@
         android:supportsRtl="true"
         android:theme="@android:style/Theme.Light">
 
+        <!-- TELA PRINCIPAL -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -19,6 +20,11 @@
             </intent-filter>
 
         </activity>
+
+        <!-- TELA ADICIONAR GASTO -->
+        <activity
+            android:name=".AddExpenseActivity"
+            android:exported="false" />
 
     </application>
 
