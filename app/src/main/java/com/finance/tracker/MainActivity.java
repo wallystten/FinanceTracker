@@ -1,9 +1,9 @@
 package com.finance.tracker;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.Toast;
 
 public class MainActivity extends Activity {
 
@@ -12,10 +12,10 @@ public class MainActivity extends Activity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnAdd = findViewById(R.id.btnAdd);
+        Button btnAddExpense = findViewById(R.id.btnAddExpense);
 
-        btnAdd.setOnClickListener(v ->
-                Toast.makeText(this, "Função em desenvolvimento", Toast.LENGTH_SHORT).show()
+        btnAddExpense.setOnClickListener(v ->
+                startActivity(new Intent(this, AddExpenseActivity.class))
         );
     }
 }
