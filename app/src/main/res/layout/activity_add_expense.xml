@@ -1,60 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:padding="16dp"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:padding="16dp">
+    android:layout_height="match_parent">
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/edtDescription"
+        android:hint="Descrição do gasto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+        android:layout_height="wrap_content"/>
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Adicionar gasto"
-            android:textSize="22sp"
-            android:textStyle="bold"
-            android:layout_marginBottom="16dp" />
+    <EditText
+        android:id="@+id/edtValue"
+        android:hint="Valor (R$)"
+        android:inputType="numberDecimal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
-        <!-- VALOR -->
-        <EditText
-            android:id="@+id/edtValor"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Valor (ex: 35.90)"
-            android:inputType="numberDecimal"
-            android:layout_marginBottom="12dp" />
+    <EditText
+        android:id="@+id/edtBank"
+        android:hint="Banco / Carteira"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
-        <!-- DESCRIÇÃO -->
-        <EditText
-            android:id="@+id/edtDescricao"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:hint="Descrição (ex: Supermercado)"
-            android:layout_marginBottom="12dp" />
+    <Button
+        android:id="@+id/btnSave"
+        android:text="Salvar gasto"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"/>
 
-        <!-- CATEGORIA -->
-        <Spinner
-            android:id="@+id/spCategoria"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="12dp" />
-
-        <!-- BANCO -->
-        <Spinner
-            android:id="@+id/spBanco"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginBottom="20dp" />
-
-        <!-- BOTÃO SALVAR -->
-        <Button
-            android:id="@+id/btnSalvar"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:text="Salvar gasto" />
-
-    </LinearLayout>
-
-</ScrollView>
+</LinearLayout>
