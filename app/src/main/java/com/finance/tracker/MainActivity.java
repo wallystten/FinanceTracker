@@ -1,6 +1,7 @@
 package com.finance.tracker;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
 import android.widget.TextView;
@@ -15,8 +16,9 @@ public class MainActivity extends Activity {
         TextView txtStatus = findViewById(R.id.txtStatus);
         Button btnTest = findViewById(R.id.btnTest);
 
-        btnTest.setOnClickListener(v ->
-                txtStatus.setText("Botão funcionando 👍")
-        );
+        btnTest.setOnClickListener(v -> {
+            txtStatus.setText("Abrindo tela de gasto...");
+            startActivity(new Intent(MainActivity.this, AddExpenseActivity.class));
+        });
     }
 }
