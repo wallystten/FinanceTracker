@@ -1,5 +1,7 @@
 package com.finance.tracker;
 
+import androidpackage com.finance.tracker;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -12,11 +14,11 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Abre diretamente a tela de permissão de notificações
+        // Abre diretamente a tela correta exigida pelo Android 15
         Intent intent = new Intent(Settings.ACTION_NOTIFICATION_LISTENER_SETTINGS);
+        intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
 
-        // Fecha a Activity (app não precisa de tela ainda)
         finish();
     }
 }
