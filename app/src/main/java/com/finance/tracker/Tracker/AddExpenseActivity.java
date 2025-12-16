@@ -1,62 +1,52 @@
 package com.finance.tracker;
 
+import android.app.Activity;
+import android.content.ContentValues;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.Spinner;
+import android.widget.EditText;
 import android.widget.Toast;
 
-import androidx.appcompat.app.AppCompatActivity;
-
-public class AddExpenseActivity extends AppCompatActivity {
+public class AddExpenseActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_expense);
 
-        Spinner spCategoria = findViewById(R.id.spCategoria);
-        Spinner spBanco = findViewById(R.id.spBanco);
-        Button btnSalvar = findViewById(R.id.btnSalvar);
+        EditText edtDescription = findViewById(R.id.edtDescription);
+        EditText edtValue = findViewById(R.id.edtValue);
+        EditText edtBank = findViewById(R.id.edtBank);
+        Button btnSave = findViewById(R.id.btnSave);
 
-        // Categorias simples
-        String[] categorias = {
-                "Alimentação", "Transporte", "Moradia",
-                "Lazer", "Saúde", "Outros"
-        };
+        DatabaseHelper dbHelper = new DatabaseHelper(this);
 
-        // Bancos e fintechs conhecidos
-        String[] bancos = {
-                "Dinheiro",
-                "Nubank",
-                "Banco do Brasil",
-                "Caixa",
-                "Bradesco",
-                "Itaú",
-                "Santander",
-                "Inter",
-                "PicPay",
-                "Mercado Pago",
-                "PagBank",
-                "Outro"
-        };
+        btnSave.setOnClickListener(v -> {
 
-        spCategoria.setAdapter(new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                categorias
-        ));
+            String description = edtDescription.getText().toString();
+            String valueText = edtValue.getText().toString();
+            String bank = edtBank.getText().toString();
 
-        spBanco.setAdapter(new ArrayAdapter<>(
-                this,
-                android.R.layout.simple_spinner_dropdown_item,
-                bancos
-        ));
+            if (description.isEmpty() || valueText.isEmpty()) {
+                Toast.makeText(this, "Preencha os campos obrigatórios", Toast.LENGTH_SHORT).show();
+                return;
+            }
 
-        btnSalvar.setOnClickListener(v ->
-                Toast.makeText(this,
-                        "Gasto salvo (simulação)",
-                        Toast.LENGTH_SHORT).show()
-        );
+            double value = Double.parseDouble(valueText);
+
+            SQLiteDatabase db = dbHelper.getWritableDatabase();
+
+            ContentValues values = new ContentValues();
+            values.put("description", description);
+            values.put("value", value);
+            values.put("bank", bank);
+            values.put("date", System.currentTimeMillis());
+
+            db.insert(DatabaseHelper.TABLE_EXPENSES, null, values);
+
+            Toast.makeText(this, "Gasto salvo com sucesso", Toast.LENGTH_SHORT).show();
+            finish();
+        });
     }
 }
