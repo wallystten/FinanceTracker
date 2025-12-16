@@ -1,19 +1,22 @@
 package com.finance.tracker;
 
-import android.app.Activity;
 import android.os.Bundle;
+import android.widget.Button;
 import android.widget.TextView;
+import androidx.appcompat.app.AppCompatActivity;
 
-public class MainActivity extends Activity {
+public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
 
-        TextView tv = new TextView(this);
-        tv.setText("App estável.\nBase funcionando.");
-        tv.setTextSize(22);
+        TextView txtStatus = findViewById(R.id.txtStatus);
+        Button btnTest = findViewById(R.id.btnTest);
 
-        setContentView(tv);
+        btnTest.setOnClickListener(v ->
+                txtStatus.setText("Botão funcionando 👍")
+        );
     }
 }
