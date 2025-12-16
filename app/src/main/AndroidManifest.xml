@@ -12,27 +12,22 @@
 
         <!-- Activity principal -->
         <activity
-            android:name="com.finance.tracker.MainActivity"
-            android:exported="true">
+    android:name="com.finance.tracker.MainActivity"
+    android:exported="true">
+    <intent-filter>
+        <action android:name="android.intent.action.MAIN" />
+        <category android:name="android.intent.category.LAUNCHER" />
+    </intent-filter>
+</activity>
 
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
-            </intent-filter>
-
-        </activity>
-
-        <!-- SERVICE DE NOTIFICAÇÃO (ESSENCIAL) -->
-        <service
-            android:name="com.finance.tracker.NotificationListener"
-            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
-            android:exported="false">
-
-            <intent-filter>
-                <action android:name="android.service.notification.NotificationListenerService"/>
-            </intent-filter>
-
-        </service>
+<service
+    android:name="com.finance.tracker.NotificationListener"
+    android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+    android:exported="false">
+    <intent-filter>
+        <action android:name="android.service.notification.NotificationListenerService" />
+    </intent-filter>
+</service>
 
     </application>
 
