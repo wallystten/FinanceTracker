@@ -5,29 +5,33 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Adicionar gasto"
+        android:textSize="20sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="16dp"/>
+
     <EditText
         android:id="@+id/edtDescription"
-        android:hint="Descrição do gasto"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:hint="Descrição do gasto"
+        android:layout_marginBottom="8dp"/>
 
     <EditText
         android:id="@+id/edtValue"
-        android:hint="Valor (R$)"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Valor (ex: 25.90)"
         android:inputType="numberDecimal"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
-
-    <EditText
-        android:id="@+id/edtBank"
-        android:hint="Banco / Carteira"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_marginBottom="16dp"/>
 
     <Button
-        android:id="@+id/btnSave"
-        android:text="Salvar gasto"
+        android:id="@+id/btnSaveExpense"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="Salvar gasto"/>
 
 </LinearLayout>
