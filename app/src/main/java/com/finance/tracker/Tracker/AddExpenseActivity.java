@@ -1,36 +1,45 @@
 package com.finance.tracker;
 
 import android.app.Activity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.Toast;
+import android.widget.LinearLayout;
 
 public class AddExpenseActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_add_expense);
 
-        EditText edtDescription = findViewById(R.id.edtDescription);
-        EditText edtValue = findViewById(R.id.edtValue);
-        Button btnSave = findViewById(R.id.btnSaveExpense);
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 40, 40, 40);
+
+        EditText edtValue = new EditText(this);
+        edtValue.setHint("Valor do gasto (ex: 25.50)");
+
+        Button btnSave = new Button(this);
+        btnSave.setText("Salvar gasto");
+
+        layout.addView(edtValue);
+        layout.addView(btnSave);
+
+        setContentView(layout);
 
         btnSave.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String desc = edtDescription.getText().toString();
+
                 String value = edtValue.getText().toString();
 
-                Toast.makeText(
-                        AddExpenseActivity.this,
-                        "Gasto salvo: " + desc + " - R$ " + value,
-                        Toast.LENGTH_SHORT
-                ).show();
+                Intent result = new Intent();
+                result.putExtra("expense_value", value);
 
-                finish(); // volta para a tela principal
+                setResult(Activity.RESULT_OK, result);
+                finish();
             }
         });
     }
