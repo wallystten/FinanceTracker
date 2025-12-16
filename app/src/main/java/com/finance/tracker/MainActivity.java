@@ -1,13 +1,19 @@
 package com.finance.tracker;
 
+import android.app.Activity;
 import android.os.Bundle;
-import androidx.appcompat.app.AppCompatActivity;
+import android.widget.TextView;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(android.R.layout.simple_list_item_1);
+
+        TextView tv = new TextView(this);
+        tv.setText("Minhas Finanças\n\nApp iniciado com sucesso.");
+        tv.setTextSize(20);
+
+        setContentView(tv);
     }
 }
