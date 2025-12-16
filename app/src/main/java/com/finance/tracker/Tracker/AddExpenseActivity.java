@@ -1,10 +1,11 @@
 package com.finance.tracker;
 
-import android.app.Activity;
 import android.os.Bundle;
 import android.widget.TextView;
 
-public class AddExpenseActivity extends Activity {
+import androidx.appcompat.app.AppCompatActivity;
+
+public class AddExpenseActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
