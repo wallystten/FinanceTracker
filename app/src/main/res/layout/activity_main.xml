@@ -27,32 +27,16 @@
             android:textColor="#666666"
             android:layout_marginBottom="16dp" />
 
-        <!-- CARD SALDO -->
-        <LinearLayout
-            android:layout_width="match_parent"
+        <!-- TOTAL DO MÊS -->
+        <TextView
+            android:id="@+id/txtTotalMonth"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="#FFFFFF"
-            android:elevation="4dp"
-            android:layout_marginBottom="16dp">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Total gasto no mês"
-                android:textColor="#666666"
-                android:textSize="14sp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="R$ 0,00"
-                android:textSize="28sp"
-                android:textStyle="bold"
-                android:textColor="#2E7D32"
-                android:layout_marginTop="4dp" />
-        </LinearLayout>
+            android:text="R$ 0,00"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:textColor="#2E7D32"
+            android:layout_marginBottom="16dp" />
 
         <!-- BOTÕES -->
         <Button
@@ -76,13 +60,13 @@
             android:text="🏦 Informar banco / carteira"
             android:layout_marginBottom="16dp" />
 
-        <!-- LISTA DE GASTOS -->
+        <!-- LISTA (placeholder) -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Últimos gastos"
-            android:textStyle="bold"
             android:textSize="18sp"
+            android:textStyle="bold"
             android:textColor="#1A1A1A"
             android:layout_marginBottom="8dp" />
 
