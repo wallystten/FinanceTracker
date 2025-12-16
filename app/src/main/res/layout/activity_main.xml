@@ -6,17 +6,24 @@
     android:padding="24dp">
 
     <TextView
+        android:text="Minhas Finanças"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <TextView
         android:id="@+id/txtStatus"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="App estável.\nBase funcionando."
-        android:textSize="18sp"
-        android:layout_marginBottom="16dp"/>
+        android:text="App estável. Base funcionando."
+        android:layout_marginTop="12dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <Button
         android:id="@+id/btnTest"
+        android:text="Testar botão"
+        android:layout_marginTop="20dp"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Testar botão"/>
+        android:layout_height="wrap_content" />
 
 </LinearLayout>
