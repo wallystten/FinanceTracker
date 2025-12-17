@@ -7,12 +7,14 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "financas.db";
-    private static final int DATABASE_VERSION = 3; // ⬅️ aumentou
+    private static final int DATABASE_VERSION = 3;
 
     public static final String TABLE = "transactions";
 
@@ -28,7 +30,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "value REAL," +
                         "type TEXT," +
                         "bank TEXT," +
-                        "category TEXT," + // ⬅️ NOVO
+                        "category TEXT," +
                         "date INTEGER" +
                         ")"
         );
@@ -89,9 +91,9 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
             String line =
                     (type.equals("income") ? "➕ " : "➖ ") +
-                    "R$ " + value +
-                    " • " + bank +
-                    " • " + category;
+                            "R$ " + value +
+                            " • " + bank +
+                            " • " + category;
 
             list.add(line);
         }
@@ -99,5 +101,29 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.close();
         db.close();
         return list;
+    }
+
+    // ✅ Total gasto por categoria (somente despesas)
+    public Map<String, Double> getExpensesByCategory() {
+        Map<String, Double> map = new HashMap<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor c = db.rawQuery(
+                "SELECT category, SUM(value) " +
+                        "FROM " + TABLE +
+                        " WHERE type = 'expense' " +
+                        "GROUP BY category",
+                null
+        );
+
+        while (c.moveToNext()) {
+            String category = c.getString(0);
+            double total = c.getDouble(1);
+            map.put(category, total);
+        }
+
+        c.close();
+        db.close();
+        return map;
     }
 }
