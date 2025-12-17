@@ -96,12 +96,13 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_ADD && resultCode == RESULT_OK && data != null) {
-            double value = data.getDoubleExtra("value", 0);
-String type = data.getStringExtra("type");
-String bank = data.getStringExtra("bank");
+        double value = data.getDoubleExtra("value", 0);
+        String type = data.getStringExtra("type");
+        String bank = data.getStringExtra("bank");
+        String category = data.getStringExtra("category");
 
-db.addTransaction(value, type, bank);
-atualizarTela();
+        db.addTransaction(value, type, bank, category);
+        atualizarTela();
         }
     }
 
