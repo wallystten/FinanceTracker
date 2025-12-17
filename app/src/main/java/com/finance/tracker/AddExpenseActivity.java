@@ -52,11 +52,30 @@ public class AddExpenseActivity extends Activity {
                 "Dinheiro",
                 "Outro"
         };
-        ArrayAdapter<String> adapter =
+        ArrayAdapter<String> bankAdapter =
                 new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, banks);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerBank.setAdapter(adapter);
+        bankAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerBank.setAdapter(bankAdapter);
         root.addView(spinnerBank);
+
+        // Spinner de categorias
+        Spinner spinnerCategory = new Spinner(this);
+        String[] categories = new String[]{
+                "Alimentação",
+                "Transporte",
+                "Moradia",
+                "Lazer",
+                "Saúde",
+                "Educação",
+                "Assinaturas",
+                "Compras",
+                "Outros"
+        };
+        ArrayAdapter<String> categoryAdapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, categories);
+        categoryAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerCategory.setAdapter(categoryAdapter);
+        root.addView(spinnerCategory);
 
         Button btnSalvar = new Button(this);
         btnSalvar.setText("Salvar");
@@ -71,11 +90,13 @@ public class AddExpenseActivity extends Activity {
             } catch (Exception ignored) {}
 
             String bank = spinnerBank.getSelectedItem().toString();
+            String category = spinnerCategory.getSelectedItem().toString();
 
             Intent result = new Intent();
             result.putExtra("value", value);
             result.putExtra("type", type);
             result.putExtra("bank", bank);
+            result.putExtra("category", category);
             setResult(RESULT_OK, result);
             finish();
         });
