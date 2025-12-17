@@ -6,12 +6,15 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "financas.db";
-    private static final int DATABASE_VERSION = 2;
+    private static final int DATABASE_VERSION = 1;
 
-    public static final String TABLE_TRANSACTIONS = "transactions";
+    public static final String TABLE = "transactions";
 
     public DatabaseHelper(Context context) {
         super(context, DATABASE_NAME, null, DATABASE_VERSION);
@@ -20,10 +23,10 @@ public class DatabaseHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase db) {
         db.execSQL(
-                "CREATE TABLE " + TABLE_TRANSACTIONS + " (" +
-                        "id INTEGER PRIMARY KEY AUTOINCREMENT, " +
-                        "value REAL, " +
-                        "type TEXT, " +        // income ou expense
+                "CREATE TABLE " + TABLE + " (" +
+                        "id INTEGER PRIMARY KEY AUTOINCREMENT," +
+                        "value REAL," +
+                        "type TEXT," +
                         "date INTEGER" +
                         ")"
         );
@@ -31,42 +34,54 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE_TRANSACTIONS);
+        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
         onCreate(db);
     }
 
-    // Salva gasto ou receita
+    // Salvar transação
     public void addTransaction(double value, String type) {
-        SQLiteDatabase db = this.getWritableDatabase();
-
-        ContentValues values = new ContentValues();
-        values.put("value", value);
-        values.put("type", type);
-        values.put("date", System.currentTimeMillis());
-
-        db.insert(TABLE_TRANSACTIONS, null, values);
+        SQLiteDatabase db = getWritableDatabase();
+        ContentValues cv = new ContentValues();
+        cv.put("value", value);
+        cv.put("type", type);
+        cv.put("date", System.currentTimeMillis());
+        db.insert(TABLE, null, cv);
         db.close();
     }
 
-    // Calcula saldo automaticamente
+    // Calcular saldo
     public double getBalance() {
-        SQLiteDatabase db = this.getReadableDatabase();
+        SQLiteDatabase db = getReadableDatabase();
+        Cursor c = db.rawQuery(
+                "SELECT SUM(CASE WHEN type='income' THEN value ELSE -value END) FROM " + TABLE,
+                null
+        );
+        double total = 0;
+        if (c.moveToFirst()) total = c.getDouble(0);
+        c.close();
+        db.close();
+        return total;
+    }
 
-        Cursor cursor = db.rawQuery(
-                "SELECT SUM(CASE " +
-                        "WHEN type='income' THEN value " +
-                        "WHEN type='expense' THEN -value " +
-                        "ELSE 0 END) FROM " + TABLE_TRANSACTIONS,
+    // 🔹 LISTA DE TRANSAÇÕES
+    public List<String> getAllTransactions() {
+        List<String> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor c = db.rawQuery(
+                "SELECT value, type FROM " + TABLE + " ORDER BY date DESC",
                 null
         );
 
-        double balance = 0;
-        if (cursor.moveToFirst()) {
-            balance = cursor.getDouble(0);
+        while (c.moveToNext()) {
+            double value = c.getDouble(0);
+            String type = c.getString(1);
+            String line = (type.equals("income") ? "➕ " : "➖ ") + "R$ " + value;
+            list.add(line);
         }
 
-        cursor.close();
+        c.close();
         db.close();
-        return balance;
+        return list;
     }
 }
