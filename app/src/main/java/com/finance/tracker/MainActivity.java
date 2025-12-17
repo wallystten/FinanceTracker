@@ -2,7 +2,9 @@ package com.finance.tracker;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -23,37 +25,51 @@ public class MainActivity extends Activity {
 
         db = new DatabaseHelper(this);
 
-        // Layout principal
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
+        root.setBackgroundColor(Color.parseColor("#F2F2F2"));
 
-        // Saldo
+        // CARD SALDO
+        LinearLayout cardSaldo = new LinearLayout(this);
+        cardSaldo.setOrientation(LinearLayout.VERTICAL);
+        cardSaldo.setPadding(40, 40, 40, 40);
+        cardSaldo.setBackgroundColor(Color.WHITE);
+
         txtSaldo = new TextView(this);
-        txtSaldo.setTextSize(22);
-        root.addView(txtSaldo);
+        txtSaldo.setTextSize(24);
+        txtSaldo.setGravity(Gravity.CENTER);
 
-        // Linha de botões
+        cardSaldo.addView(txtSaldo);
+        root.addView(cardSaldo);
+
+        // BOTÕES
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
+        row.setPadding(0, 40, 0, 40);
 
         Button btnGasto = new Button(this);
         btnGasto.setText("➖ Gasto");
+        btnGasto.setBackgroundColor(Color.parseColor("#F44336"));
+        btnGasto.setTextColor(Color.WHITE);
 
         Button btnReceita = new Button(this);
         btnReceita.setText("➕ Receita");
+        btnReceita.setBackgroundColor(Color.parseColor("#4CAF50"));
+        btnReceita.setTextColor(Color.WHITE);
 
         row.addView(btnGasto);
         row.addView(btnReceita);
         root.addView(row);
 
-        // Título da lista
+        // TÍTULO LISTA
         TextView title = new TextView(this);
-        title.setText("\nTransações");
+        title.setText("Histórico");
         title.setTextSize(18);
+        title.setPadding(0, 0, 0, 16);
         root.addView(title);
 
-        // Container da lista
+        // LISTA
         listContainer = new LinearLayout(this);
         listContainer.setOrientation(LinearLayout.VERTICAL);
         root.addView(listContainer);
@@ -62,18 +78,16 @@ public class MainActivity extends Activity {
 
         atualizarTela();
 
-        // Botão gasto
         btnGasto.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AddExpenseActivity.class);
-            intent.putExtra("type", "expense");
-            startActivityForResult(intent, REQUEST_ADD);
+            Intent i = new Intent(this, AddExpenseActivity.class);
+            i.putExtra("type", "expense");
+            startActivityForResult(i, REQUEST_ADD);
         });
 
-        // Botão receita
         btnReceita.setOnClickListener(v -> {
-            Intent intent = new Intent(this, AddExpenseActivity.class);
-            intent.putExtra("type", "income");
-            startActivityForResult(intent, REQUEST_ADD);
+            Intent i = new Intent(this, AddExpenseActivity.class);
+            i.putExtra("type", "income");
+            startActivityForResult(i, REQUEST_ADD);
         });
     }
 
@@ -91,18 +105,17 @@ public class MainActivity extends Activity {
     }
 
     private void atualizarTela() {
-        // Atualiza saldo
         double saldo = db.getBalance();
-        txtSaldo.setText("Saldo: R$ " + String.format("%.2f", saldo));
+        txtSaldo.setText("Saldo\nR$ " + String.format("%.2f", saldo));
+        txtSaldo.setTextColor(saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED);
 
-        // Atualiza lista
         listContainer.removeAllViews();
         List<String> list = db.getAllTransactions();
 
         if (list.isEmpty()) {
-            TextView empty = new TextView(this);
-            empty.setText("Nenhuma transação ainda.");
-            listContainer.addView(empty);
+            TextView tv = new TextView(this);
+            tv.setText("Nenhuma transação ainda");
+            listContainer.addView(tv);
             return;
         }
 
@@ -110,6 +123,16 @@ public class MainActivity extends Activity {
             TextView tv = new TextView(this);
             tv.setText(item);
             tv.setTextSize(16);
+            tv.setPadding(24, 24, 24, 24);
+            tv.setBackgroundColor(Color.WHITE);
+
+            LinearLayout.LayoutParams p =
+                    new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+            p.setMargins(0, 0, 0, 16);
+            tv.setLayoutParams(p);
+
             listContainer.addView(tv);
         }
     }
