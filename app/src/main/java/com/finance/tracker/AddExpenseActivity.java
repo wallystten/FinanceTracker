@@ -3,12 +3,10 @@ package com.finance.tracker;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
-import android.text.InputType;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class AddExpenseActivity extends Activity {
 
@@ -16,60 +14,39 @@ public class AddExpenseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Define tipo (gasto ou receita) de forma FINAL
-        final String transactionType =
-                getIntent().getStringExtra("type") != null
-                        ? getIntent().getStringExtra("type")
-                        : "expense";
+        String type = getIntent().getStringExtra("type");
 
-        // Layout base
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(32, 32, 32, 32);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(32, 32, 32, 32);
 
-        // Título
         TextView title = new TextView(this);
-        title.setText(
-                transactionType.equals("income")
-                        ? "Adicionar Receita"
-                        : "Adicionar Gasto"
-        );
+        title.setText(type.equals("income") ? "Adicionar Receita" : "Adicionar Gasto");
         title.setTextSize(22);
+        root.addView(title);
 
-        // Campo valor
         EditText edtValue = new EditText(this);
-        edtValue.setHint("Valor (ex: 50.00)");
-        edtValue.setInputType(
-                InputType.TYPE_CLASS_NUMBER |
-                InputType.TYPE_NUMBER_FLAG_DECIMAL
-        );
+        edtValue.setHint("Valor (ex: 25.50)");
+        edtValue.setInputType(android.text.InputType.TYPE_CLASS_NUMBER
+                | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        root.addView(edtValue);
 
-        // Botão salvar
-        Button btnSave = new Button(this);
-        btnSave.setText("Salvar");
+        Button btnSalvar = new Button(this);
+        btnSalvar.setText("Salvar");
+        root.addView(btnSalvar);
 
-        layout.addView(title);
-        layout.addView(edtValue);
-        layout.addView(btnSave);
+        setContentView(root);
 
-        setContentView(layout);
-
-        // Ação do botão
-        btnSave.setOnClickListener(v -> {
-            String valueStr = edtValue.getText().toString().trim();
-
-            if (valueStr.isEmpty()) {
-                Toast.makeText(this, "Informe um valor", Toast.LENGTH_SHORT).show();
-                return;
-            }
-
-            double value = Double.parseDouble(valueStr);
+        btnSalvar.setOnClickListener(v -> {
+            double value = 0;
+            try {
+                value = Double.parseDouble(edtValue.getText().toString());
+            } catch (Exception ignored) {}
 
             Intent result = new Intent();
             result.putExtra("value", value);
-            result.putExtra("type", transactionType);
-
-            setResult(Activity.RESULT_OK, result);
+            result.putExtra("type", type);
+            setResult(RESULT_OK, result);
             finish();
         });
     }
