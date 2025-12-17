@@ -6,48 +6,45 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- Título -->
+    <!-- SALDO -->
     <TextView
+        android:id="@+id/txtTotal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Minhas Finanças"
-        android:textSize="24sp"
+        android:text="Saldo: R$ 0,00"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#1E1E1E"
-        android:layout_marginBottom="12dp"/>
+        android:textColor="#1B5E20"
+        android:layout_marginBottom="16dp"/>
 
-    <!-- Card de ação -->
+    <!-- BOTÕES -->
     <LinearLayout
-        android:orientation="vertical"
-        android:background="#FFFFFF"
-        android:padding="16dp"
+        android:orientation="horizontal"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:elevation="4dp"
         android:layout_marginBottom="16dp">
 
         <Button
-            android:id="@+id/btnTest"
-            android:layout_width="match_parent"
+            android:id="@+id/btnAddExpense"
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
-            android:text="➕ Adicionar gasto"
-            android:textSize="16sp"
-            android:backgroundTint="#2E7D32"
+            android:text="➖ Gasto"
+            android:backgroundTint="#C62828"
             android:textColor="#FFFFFF"/>
 
+        <Button
+            android:id="@+id/btnAddIncome"
+            android:layout_width="0dp"
+            android:layout_weight="1"
+            android:layout_height="wrap_content"
+            android:text="➕ Receita"
+            android:backgroundTint="#2E7D32"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="8dp"/>
     </LinearLayout>
 
-    <!-- Subtítulo -->
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="Gastos adicionados"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:textColor="#333333"
-        android:layout_marginBottom="8dp"/>
-
-    <!-- Lista -->
+    <!-- LISTA -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
