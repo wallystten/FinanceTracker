@@ -16,9 +16,11 @@ public class AddExpenseActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Recebe se é gasto ou receita
-        String type = getIntent().getStringExtra("type");
-        if (type == null) type = "expense";
+        // Define tipo (gasto ou receita) de forma FINAL
+        final String transactionType =
+                getIntent().getStringExtra("type") != null
+                        ? getIntent().getStringExtra("type")
+                        : "expense";
 
         // Layout base
         LinearLayout layout = new LinearLayout(this);
@@ -27,13 +29,20 @@ public class AddExpenseActivity extends Activity {
 
         // Título
         TextView title = new TextView(this);
-        title.setText(type.equals("income") ? "Adicionar Receita" : "Adicionar Gasto");
+        title.setText(
+                transactionType.equals("income")
+                        ? "Adicionar Receita"
+                        : "Adicionar Gasto"
+        );
         title.setTextSize(22);
 
         // Campo valor
         EditText edtValue = new EditText(this);
         edtValue.setHint("Valor (ex: 50.00)");
-        edtValue.setInputType(InputType.TYPE_CLASS_NUMBER | InputType.TYPE_NUMBER_FLAG_DECIMAL);
+        edtValue.setInputType(
+                InputType.TYPE_CLASS_NUMBER |
+                InputType.TYPE_NUMBER_FLAG_DECIMAL
+        );
 
         // Botão salvar
         Button btnSave = new Button(this);
@@ -58,7 +67,7 @@ public class AddExpenseActivity extends Activity {
 
             Intent result = new Intent();
             result.putExtra("value", value);
-            result.putExtra("type", type);
+            result.putExtra("type", transactionType);
 
             setResult(Activity.RESULT_OK, result);
             finish();
