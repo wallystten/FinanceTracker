@@ -3,9 +3,12 @@ package com.finance.tracker;
 import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 public class AddExpenseActivity extends Activity {
@@ -23,6 +26,7 @@ public class AddExpenseActivity extends Activity {
         TextView title = new TextView(this);
         title.setText(type.equals("income") ? "Adicionar Receita" : "Adicionar Gasto");
         title.setTextSize(22);
+        title.setGravity(Gravity.CENTER_HORIZONTAL);
         root.addView(title);
 
         EditText edtValue = new EditText(this);
@@ -30,6 +34,29 @@ public class AddExpenseActivity extends Activity {
         edtValue.setInputType(android.text.InputType.TYPE_CLASS_NUMBER
                 | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
         root.addView(edtValue);
+
+        // Spinner de bancos
+        Spinner spinnerBank = new Spinner(this);
+        String[] banks = new String[]{
+                "Nubank",
+                "Itaú",
+                "Bradesco",
+                "Santander",
+                "Inter",
+                "C6 Bank",
+                "Caixa",
+                "Banco do Brasil",
+                "PicPay",
+                "Mercado Pago",
+                "Pix",
+                "Dinheiro",
+                "Outro"
+        };
+        ArrayAdapter<String> adapter =
+                new ArrayAdapter<>(this, android.R.layout.simple_spinner_item, banks);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerBank.setAdapter(adapter);
+        root.addView(spinnerBank);
 
         Button btnSalvar = new Button(this);
         btnSalvar.setText("Salvar");
@@ -43,9 +70,12 @@ public class AddExpenseActivity extends Activity {
                 value = Double.parseDouble(edtValue.getText().toString());
             } catch (Exception ignored) {}
 
+            String bank = spinnerBank.getSelectedItem().toString();
+
             Intent result = new Intent();
             result.putExtra("value", value);
             result.putExtra("type", type);
+            result.putExtra("bank", bank);
             setResult(RESULT_OK, result);
             finish();
         });
