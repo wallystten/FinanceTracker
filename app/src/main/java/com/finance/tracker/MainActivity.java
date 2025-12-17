@@ -13,7 +13,6 @@ public class MainActivity extends Activity {
 
     private LinearLayout listContainer;
     private TextView txtTotal;
-
     private double saldo = 0.0;
 
     @Override
@@ -25,7 +24,7 @@ public class MainActivity extends Activity {
         listContainer = findViewById(R.id.listContainer);
 
         Button btnAddExpense = findViewById(R.id.btnAddExpense);
-        Button btnAddIncome = findViewById(R.id.btnAddIncome);
+        Button btnAddIncome  = findViewById(R.id.btnAddIncome);
 
         btnAddExpense.setOnClickListener(v -> {
             Intent intent = new Intent(this, AddExpenseActivity.class);
