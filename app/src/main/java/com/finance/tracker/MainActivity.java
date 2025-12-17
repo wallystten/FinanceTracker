@@ -4,20 +4,21 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
     private static final int REQUEST_ADD_EXPENSE = 1;
-    private TextView txtStatus;
+    private LinearLayout listContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        txtStatus = findViewById(R.id.txtStatus);
         Button btnAddExpense = findViewById(R.id.btnTest);
+        listContainer = findViewById(R.id.listContainer);
 
         btnAddExpense.setOnClickListener(v -> {
             Intent intent = new Intent(MainActivity.this, AddExpenseActivity.class);
@@ -33,7 +34,12 @@ public class MainActivity extends Activity {
             String value = data.getStringExtra("expense_value");
 
             if (value != null && !value.isEmpty()) {
-                txtStatus.setText("Último gasto: R$ " + value);
+                TextView item = new TextView(this);
+                item.setText("• Gasto: R$ " + value);
+                item.setTextSize(16);
+                item.setPadding(8, 8, 8, 8);
+
+                listContainer.addView(item);
             }
         }
     }
