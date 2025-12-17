@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.util.List;
+import java.util.Map;
 
 public class MainActivity extends Activity {
 
@@ -17,6 +18,7 @@ public class MainActivity extends Activity {
 
     private DatabaseHelper db;
     private TextView txtSaldo;
+    private LinearLayout summaryCategoryContainer;
     private LinearLayout listContainer;
 
     @Override
@@ -30,7 +32,7 @@ public class MainActivity extends Activity {
         root.setPadding(32, 32, 32, 32);
         root.setBackgroundColor(Color.parseColor("#F2F2F2"));
 
-        // CARD SALDO
+        // ===== CARD SALDO =====
         LinearLayout cardSaldo = new LinearLayout(this);
         cardSaldo.setOrientation(LinearLayout.VERTICAL);
         cardSaldo.setPadding(40, 40, 40, 40);
@@ -43,7 +45,7 @@ public class MainActivity extends Activity {
         cardSaldo.addView(txtSaldo);
         root.addView(cardSaldo);
 
-        // BOTÕES
+        // ===== BOTÕES =====
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, 40, 0, 40);
@@ -62,14 +64,24 @@ public class MainActivity extends Activity {
         row.addView(btnReceita);
         root.addView(row);
 
-        // TÍTULO LISTA
+        // ===== RESUMO POR CATEGORIA =====
+        TextView resumoTitle = new TextView(this);
+        resumoTitle.setText("📊 Gastos por categoria");
+        resumoTitle.setTextSize(18);
+        resumoTitle.setPadding(0, 0, 0, 16);
+        root.addView(resumoTitle);
+
+        summaryCategoryContainer = new LinearLayout(this);
+        summaryCategoryContainer.setOrientation(LinearLayout.VERTICAL);
+        root.addView(summaryCategoryContainer);
+
+        // ===== HISTÓRICO =====
         TextView title = new TextView(this);
         title.setText("Histórico");
         title.setTextSize(18);
-        title.setPadding(0, 0, 0, 16);
+        title.setPadding(0, 32, 0, 16);
         root.addView(title);
 
-        // LISTA
         listContainer = new LinearLayout(this);
         listContainer.setOrientation(LinearLayout.VERTICAL);
         root.addView(listContainer);
@@ -96,21 +108,44 @@ public class MainActivity extends Activity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_ADD && resultCode == RESULT_OK && data != null) {
-        double value = data.getDoubleExtra("value", 0);
-        String type = data.getStringExtra("type");
-        String bank = data.getStringExtra("bank");
-        String category = data.getStringExtra("category");
+            double value = data.getDoubleExtra("value", 0);
+            String type = data.getStringExtra("type");
+            String bank = data.getStringExtra("bank");
+            String category = data.getStringExtra("category");
 
-        db.addTransaction(value, type, bank, category);
-        atualizarTela();
+            db.addTransaction(value, type, bank, category);
+            atualizarTela();
         }
     }
 
     private void atualizarTela() {
+        // ===== SALDO =====
         double saldo = db.getBalance();
         txtSaldo.setText("Saldo\nR$ " + String.format("%.2f", saldo));
         txtSaldo.setTextColor(saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED);
 
+        // ===== RESUMO POR CATEGORIA =====
+        summaryCategoryContainer.removeAllViews();
+
+        Map<String, Double> resumo = db.getExpensesByCategory();
+        for (String categoria : resumo.keySet()) {
+            TextView tv = new TextView(this);
+            tv.setText(categoria + ": R$ " + String.format("%.2f", resumo.get(categoria)));
+            tv.setTextSize(16);
+            tv.setPadding(24, 16, 24, 16);
+            tv.setBackgroundColor(Color.WHITE);
+
+            LinearLayout.LayoutParams p =
+                    new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+            p.setMargins(0, 0, 0, 12);
+            tv.setLayoutParams(p);
+
+            summaryCategoryContainer.addView(tv);
+        }
+
+        // ===== HISTÓRICO =====
         listContainer.removeAllViews();
         List<String> list = db.getAllTransactions();
 
