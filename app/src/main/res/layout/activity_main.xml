@@ -3,28 +3,46 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="16dp"
+    android:background="#F2F2F2">
 
     <!-- Título -->
     <TextView
-        android:id="@+id/txtTitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="💰 Minhas Finanças"
-        android:textSize="22sp"
+        android:textSize="24sp"
         android:textStyle="bold"
         android:gravity="center"
         android:layout_marginBottom="16dp" />
 
-    <!-- Resumo -->
-    <TextView
-        android:id="@+id/txtSummary"
+    <!-- Cartão de Saldo -->
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Saldo atual"
-        android:textSize="16sp"
-        android:gravity="center"
-        android:layout_marginBottom="12dp" />
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:background="#FFFFFF"
+        android:layout_marginBottom="16dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Saldo atual"
+            android:textSize="14sp"
+            android:textColor="#666666" />
+
+        <TextView
+            android:id="@+id/txtStatus"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="R$ 0,00"
+            android:textSize="26sp"
+            android:textStyle="bold"
+            android:textColor="#2E7D32"
+            android:layout_marginTop="8dp" />
+
+    </LinearLayout>
 
     <!-- Botões lado a lado -->
     <LinearLayout
@@ -39,7 +57,9 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="➖ Gasto"
-            android:layout_marginEnd="4dp" />
+            android:backgroundTint="#C62828"
+            android:textColor="#FFFFFF"
+            android:layout_marginEnd="6dp" />
 
         <Button
             android:id="@+id/btnAddIncome"
@@ -47,18 +67,19 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:text="➕ Receita"
-            android:layout_marginStart="4dp" />
+            android:backgroundTint="#2E7D32"
+            android:textColor="#FFFFFF"
+            android:layout_marginStart="6dp" />
 
     </LinearLayout>
 
-    <!-- Área de status / histórico -->
+    <!-- Área informativa -->
     <TextView
-        android:id="@+id/txtStatus"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Nenhuma transação ainda."
-        android:gravity="center"
+        android:text="Use os botões acima para registrar seus gastos e receitas."
         android:textSize="14sp"
-        android:layout_marginTop="16dp" />
+        android:textColor="#444444"
+        android:gravity="center" />
 
 </LinearLayout>
