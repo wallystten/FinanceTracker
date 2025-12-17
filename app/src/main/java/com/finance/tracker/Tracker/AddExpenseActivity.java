@@ -1,4 +1,4 @@
-package com.finance.tracker;
+}package com.finance.tracker;
 
 import android.app.Activity;
 import android.content.Intent;
