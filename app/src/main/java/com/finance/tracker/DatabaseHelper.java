@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "financas.db";
-    private static final int DATABASE_VERSION = 2; // ⬅️ aumentou
+    private static final int DATABASE_VERSION = 3; // ⬅️ aumentou
 
     public static final String TABLE = "transactions";
 
@@ -27,7 +27,8 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                         "value REAL," +
                         "type TEXT," +
-                        "bank TEXT," +   // ⬅️ NOVO
+                        "bank TEXT," +
+                        "category TEXT," + // ⬅️ NOVO
                         "date INTEGER" +
                         ")"
         );
@@ -39,21 +40,22 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Salvar transação COM banco
-    public void addTransaction(double value, String type, String bank) {
+    // Salvar transação COM categoria
+    public void addTransaction(double value, String type, String bank, String category) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("value", value);
         cv.put("type", type);
         cv.put("bank", bank);
+        cv.put("category", category);
         cv.put("date", System.currentTimeMillis());
         db.insert(TABLE, null, cv);
         db.close();
     }
 
-    // Compatibilidade (sem banco ainda)
-    public void addTransaction(double value, String type) {
-        addTransaction(value, type, "Não informado");
+    // Compatibilidade
+    public void addTransaction(double value, String type, String bank) {
+        addTransaction(value, type, bank, "Outros");
     }
 
     public double getBalance() {
@@ -69,13 +71,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return total;
     }
 
-    // Lista com banco
+    // Lista com banco + categoria
     public List<String> getAllTransactions() {
         List<String> list = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor c = db.rawQuery(
-                "SELECT value, type, bank FROM " + TABLE + " ORDER BY date DESC",
+                "SELECT value, type, bank, category FROM " + TABLE + " ORDER BY date DESC",
                 null
         );
 
@@ -83,10 +85,13 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             double value = c.getDouble(0);
             String type = c.getString(1);
             String bank = c.getString(2);
+            String category = c.getString(3);
 
             String line =
                     (type.equals("income") ? "➕ " : "➖ ") +
-                    "R$ " + value + " • " + bank;
+                    "R$ " + value +
+                    " • " + bank +
+                    " • " + category;
 
             list.add(line);
         }
