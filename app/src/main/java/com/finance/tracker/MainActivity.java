@@ -97,10 +97,11 @@ public class MainActivity extends Activity {
 
         if (requestCode == REQUEST_ADD && resultCode == RESULT_OK && data != null) {
             double value = data.getDoubleExtra("value", 0);
-            String type = data.getStringExtra("type");
+String type = data.getStringExtra("type");
+String bank = data.getStringExtra("bank");
 
-            db.addTransaction(value, type);
-            atualizarTela();
+db.addTransaction(value, type, bank);
+atualizarTela();
         }
     }
 
