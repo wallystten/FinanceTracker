@@ -9,48 +9,66 @@ import android.widget.TextView;
 
 public class MainActivity extends Activity {
 
-    private static final int REQUEST_ADD_EXPENSE = 1;
+    private static final int REQUEST_ADD = 1;
+
     private LinearLayout listContainer;
+    private TextView txtTotal;
+
+    private double saldo = 0.0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnAddExpense = findViewById(R.id.btnTest);
+        txtTotal = findViewById(R.id.txtTotal);
         listContainer = findViewById(R.id.listContainer);
 
+        Button btnAddExpense = findViewById(R.id.btnAddExpense);
+        Button btnAddIncome = findViewById(R.id.btnAddIncome);
+
         btnAddExpense.setOnClickListener(v -> {
-            Intent intent = new Intent(MainActivity.this, AddExpenseActivity.class);
-            startActivityForResult(intent, REQUEST_ADD_EXPENSE);
+            Intent intent = new Intent(this, AddExpenseActivity.class);
+            intent.putExtra("type", "expense");
+            startActivityForResult(intent, REQUEST_ADD);
         });
+
+        btnAddIncome.setOnClickListener(v -> {
+            Intent intent = new Intent(this, AddExpenseActivity.class);
+            intent.putExtra("type", "income");
+            startActivityForResult(intent, REQUEST_ADD);
+        });
+
+        atualizarSaldo();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_ADD_EXPENSE && resultCode == RESULT_OK && data != null) {
-            String value = data.getStringExtra("expense_value");
+        if (requestCode == REQUEST_ADD && resultCode == RESULT_OK && data != null) {
 
-            if (value != null && !value.isEmpty()) {
-                TextView item = new TextView(this);
-item.setText("R$ " + value);
-item.setTextSize(16);
-item.setTextColor(0xFF1E1E1E);
-item.setPadding(24, 24, 24, 24);
-item.setBackgroundColor(0xFFFFFFFF);
+            double value = data.getDoubleExtra("value", 0);
+            String type = data.getStringExtra("type");
 
-LinearLayout.LayoutParams params =
-        new LinearLayout.LayoutParams(
-                LinearLayout.LayoutParams.MATCH_PARENT,
-                LinearLayout.LayoutParams.WRAP_CONTENT
-        );
-params.setMargins(0, 8, 0, 8);
-item.setLayoutParams(params);
-
-listContainer.addView(item);
+            if ("income".equals(type)) {
+                saldo += value;
+            } else {
+                saldo -= value;
             }
+
+            TextView item = new TextView(this);
+            item.setText(
+                    (type.equals("income") ? "➕ Receita: R$ " : "➖ Gasto: R$ ") + value
+            );
+            item.setPadding(24, 24, 24, 24);
+
+            listContainer.addView(item);
+            atualizarSaldo();
         }
+    }
+
+    private void atualizarSaldo() {
+        txtTotal.setText(String.format("Saldo: R$ %.2f", saldo));
     }
 }
