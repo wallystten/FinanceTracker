@@ -35,11 +35,21 @@ public class MainActivity extends Activity {
 
             if (value != null && !value.isEmpty()) {
                 TextView item = new TextView(this);
-                item.setText("• Gasto: R$ " + value);
-                item.setTextSize(16);
-                item.setPadding(8, 8, 8, 8);
+item.setText("R$ " + value);
+item.setTextSize(16);
+item.setTextColor(0xFF1E1E1E);
+item.setPadding(24, 24, 24, 24);
+item.setBackgroundColor(0xFFFFFFFF);
 
-                listContainer.addView(item);
+LinearLayout.LayoutParams params =
+        new LinearLayout.LayoutParams(
+                LinearLayout.LayoutParams.MATCH_PARENT,
+                LinearLayout.LayoutParams.WRAP_CONTENT
+        );
+params.setMargins(0, 8, 0, 8);
+item.setLayoutParams(params);
+
+listContainer.addView(item);
             }
         }
     }
