@@ -1,4 +1,4 @@
-package com.finance.tracker;
+lpackage com.finance.tracker;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -7,12 +7,15 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.util.List;
+
 public class MainActivity extends Activity {
 
     private static final int REQUEST_ADD = 1;
 
     private DatabaseHelper db;
     private TextView txtSaldo;
+    private LinearLayout listContainer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,12 +45,22 @@ public class MainActivity extends Activity {
 
         row.addView(btnGasto);
         row.addView(btnReceita);
-
         root.addView(row);
+
+        // Título da lista
+        TextView title = new TextView(this);
+        title.setText("\nTransações");
+        title.setTextSize(18);
+        root.addView(title);
+
+        // Container da lista
+        listContainer = new LinearLayout(this);
+        listContainer.setOrientation(LinearLayout.VERTICAL);
+        root.addView(listContainer);
 
         setContentView(root);
 
-        atualizarSaldo();
+        atualizarTela();
 
         // Botão gasto
         btnGasto.setOnClickListener(v -> {
@@ -73,12 +86,31 @@ public class MainActivity extends Activity {
             String type = data.getStringExtra("type");
 
             db.addTransaction(value, type);
-            atualizarSaldo();
+            atualizarTela();
         }
     }
 
-    private void atualizarSaldo() {
+    private void atualizarTela() {
+        // Atualiza saldo
         double saldo = db.getBalance();
         txtSaldo.setText("Saldo: R$ " + String.format("%.2f", saldo));
+
+        // Atualiza lista
+        listContainer.removeAllViews();
+        List<String> list = db.getAllTransactions();
+
+        if (list.isEmpty()) {
+            TextView empty = new TextView(this);
+            empty.setText("Nenhuma transação ainda.");
+            listContainer.addView(empty);
+            return;
+        }
+
+        for (String item : list) {
+            TextView tv = new TextView(this);
+            tv.setText(item);
+            tv.setTextSize(16);
+            listContainer.addView(tv);
+        }
     }
 }
