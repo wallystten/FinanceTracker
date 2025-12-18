@@ -1,15 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.finance.tracker">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <application
         android:allowBackup="true"
         android:label="Minhas Finanças"
-        android:icon="@drawable/ic_launcher"
-        android:roundIcon="@drawable/ic_launcher"
-        android:supportsRtl="true"
+        android:icon="@mipmap/ic_launcher"
         android:theme="@android:style/Theme.Light">
 
+        <!-- MAIN -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -19,9 +17,16 @@
             </intent-filter>
         </activity>
 
+        <!-- ADD GASTO / RECEITA -->
         <activity
             android:name=".AddExpenseActivity"
             android:exported="false"/>
+
+        <!-- PREMIUM -->
+        <activity
+            android:name=".PremiumActivity"
+            android:exported="false"/>
+
     </application>
 
 </manifest>
