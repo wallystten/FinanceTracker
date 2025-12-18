@@ -8,7 +8,6 @@ import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import java.util.List;
 
@@ -31,7 +30,7 @@ public class MainActivity extends Activity {
         root.setPadding(32, 32, 32, 32);
         root.setBackgroundColor(Color.parseColor("#F2F2F2"));
 
-        // ===== SALDO =====
+        // ===== CARD SALDO =====
         LinearLayout cardSaldo = new LinearLayout(this);
         cardSaldo.setOrientation(LinearLayout.VERTICAL);
         cardSaldo.setPadding(40, 40, 40, 40);
@@ -44,7 +43,7 @@ public class MainActivity extends Activity {
         cardSaldo.addView(txtSaldo);
         root.addView(cardSaldo);
 
-        // ===== BOTÕES =====
+        // ===== BOTÕES GASTO / RECEITA =====
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, 40, 0, 40);
@@ -65,12 +64,12 @@ public class MainActivity extends Activity {
 
         // ===== BOTÃO PREMIUM =====
         Button btnPremium = new Button(this);
-        btnPremium.setText("📷 Ler Nota Fiscal (Premium)");
+        btnPremium.setText("💎 Conheça o Premium");
         btnPremium.setBackgroundColor(Color.parseColor("#FFC107"));
         btnPremium.setTextColor(Color.BLACK);
         root.addView(btnPremium);
 
-        // ===== TÍTULO =====
+        // ===== TÍTULO HISTÓRICO =====
         TextView title = new TextView(this);
         title.setText("Histórico");
         title.setTextSize(18);
@@ -100,17 +99,8 @@ public class MainActivity extends Activity {
         });
 
         btnPremium.setOnClickListener(v -> {
-
-            if (!PremiumManager.isPremium(this)) {
-                Toast.makeText(
-                        this,
-                        "Recurso disponível apenas no Premium",
-                        Toast.LENGTH_LONG
-                ).show();
-                return;
-            }
-
-            Toast.makeText(this, "Premium ativo!", Toast.LENGTH_SHORT).show();
+            Intent i = new Intent(this, PremiumActivity.class);
+            startActivity(i);
         });
     }
 
@@ -132,7 +122,9 @@ public class MainActivity extends Activity {
     private void atualizarTela() {
         double saldo = db.getBalance();
         txtSaldo.setText("Saldo\nR$ " + String.format("%.2f", saldo));
-        txtSaldo.setTextColor(saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED);
+        txtSaldo.setTextColor(
+                saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED
+        );
 
         listContainer.removeAllViews();
         List<String> list = db.getAllTransactions();
