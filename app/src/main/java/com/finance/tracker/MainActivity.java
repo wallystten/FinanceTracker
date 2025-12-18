@@ -8,9 +8,9 @@ import android.view.Gravity;
 import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.List;
-import java.util.Map;
 
 public class MainActivity extends Activity {
 
@@ -18,7 +18,6 @@ public class MainActivity extends Activity {
 
     private DatabaseHelper db;
     private TextView txtSaldo;
-    private LinearLayout summaryCategoryContainer;
     private LinearLayout listContainer;
 
     @Override
@@ -27,28 +26,19 @@ public class MainActivity extends Activity {
 
         db = new DatabaseHelper(this);
 
-        // ===== ROOT =====
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
         root.setBackgroundColor(Color.parseColor("#F2F2F2"));
 
-        // ===== CARD SALDO =====
+        // ===== SALDO =====
         LinearLayout cardSaldo = new LinearLayout(this);
         cardSaldo.setOrientation(LinearLayout.VERTICAL);
-        cardSaldo.setPadding(48, 48, 48, 48);
+        cardSaldo.setPadding(40, 40, 40, 40);
         cardSaldo.setBackgroundColor(Color.WHITE);
 
-        LinearLayout.LayoutParams cardParams =
-                new LinearLayout.LayoutParams(
-                        LinearLayout.LayoutParams.MATCH_PARENT,
-                        LinearLayout.LayoutParams.WRAP_CONTENT
-                );
-        cardParams.setMargins(0, 0, 0, 32);
-        cardSaldo.setLayoutParams(cardParams);
-
         txtSaldo = new TextView(this);
-        txtSaldo.setTextSize(26);
+        txtSaldo.setTextSize(24);
         txtSaldo.setGravity(Gravity.CENTER);
 
         cardSaldo.addView(txtSaldo);
@@ -57,7 +47,7 @@ public class MainActivity extends Activity {
         // ===== BOTÕES =====
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, 0, 0, 32);
+        row.setPadding(0, 40, 0, 40);
 
         Button btnGasto = new Button(this);
         btnGasto.setText("➖ Gasto");
@@ -69,38 +59,25 @@ public class MainActivity extends Activity {
         btnReceita.setBackgroundColor(Color.parseColor("#4CAF50"));
         btnReceita.setTextColor(Color.WHITE);
 
-        LinearLayout.LayoutParams btnParams =
-                new LinearLayout.LayoutParams(
-                        0,
-                        LinearLayout.LayoutParams.WRAP_CONTENT,
-                        1
-                );
-        btnParams.setMargins(8, 0, 8, 0);
-        btnGasto.setLayoutParams(btnParams);
-        btnReceita.setLayoutParams(btnParams);
-
         row.addView(btnGasto);
         row.addView(btnReceita);
         root.addView(row);
 
-        // ===== RESUMO POR CATEGORIA =====
-        TextView resumoTitle = new TextView(this);
-        resumoTitle.setText("📊 Gastos por categoria");
-        resumoTitle.setTextSize(18);
-        resumoTitle.setPadding(0, 0, 0, 16);
-        root.addView(resumoTitle);
+        // ===== BOTÃO PREMIUM =====
+        Button btnPremium = new Button(this);
+        btnPremium.setText("📷 Ler Nota Fiscal (Premium)");
+        btnPremium.setBackgroundColor(Color.parseColor("#FFC107"));
+        btnPremium.setTextColor(Color.BLACK);
+        root.addView(btnPremium);
 
-        summaryCategoryContainer = new LinearLayout(this);
-        summaryCategoryContainer.setOrientation(LinearLayout.VERTICAL);
-        root.addView(summaryCategoryContainer);
-
-        // ===== HISTÓRICO =====
+        // ===== TÍTULO =====
         TextView title = new TextView(this);
         title.setText("Histórico");
         title.setTextSize(18);
-        title.setPadding(0, 32, 0, 16);
+        title.setPadding(0, 40, 0, 16);
         root.addView(title);
 
+        // ===== LISTA =====
         listContainer = new LinearLayout(this);
         listContainer.setOrientation(LinearLayout.VERTICAL);
         root.addView(listContainer);
@@ -121,6 +98,20 @@ public class MainActivity extends Activity {
             i.putExtra("type", "income");
             startActivityForResult(i, REQUEST_ADD);
         });
+
+        btnPremium.setOnClickListener(v -> {
+
+            if (!PremiumManager.isPremium(this)) {
+                Toast.makeText(
+                        this,
+                        "Recurso disponível apenas no Premium",
+                        Toast.LENGTH_LONG
+                ).show();
+                return;
+            }
+
+            Toast.makeText(this, "Premium ativo!", Toast.LENGTH_SHORT).show();
+        });
     }
 
     @Override
@@ -139,33 +130,10 @@ public class MainActivity extends Activity {
     }
 
     private void atualizarTela() {
-        // ===== SALDO =====
         double saldo = db.getBalance();
         txtSaldo.setText("Saldo\nR$ " + String.format("%.2f", saldo));
         txtSaldo.setTextColor(saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED);
 
-        // ===== RESUMO POR CATEGORIA =====
-        summaryCategoryContainer.removeAllViews();
-        Map<String, Double> resumo = db.getExpensesByCategory();
-
-        for (String categoria : resumo.keySet()) {
-            TextView tv = new TextView(this);
-            tv.setText(categoria + ": R$ " + String.format("%.2f", resumo.get(categoria)));
-            tv.setTextSize(16);
-            tv.setPadding(24, 16, 24, 16);
-            tv.setBackgroundColor(Color.WHITE);
-
-            LinearLayout.LayoutParams p =
-                    new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT);
-            p.setMargins(0, 0, 0, 12);
-            tv.setLayoutParams(p);
-
-            summaryCategoryContainer.addView(tv);
-        }
-
-        // ===== HISTÓRICO =====
         listContainer.removeAllViews();
         List<String> list = db.getAllTransactions();
 
