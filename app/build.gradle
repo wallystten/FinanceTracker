@@ -2,7 +2,26 @@ plugins {
     id 'com.android.application'
 }
 
+import java.util.Properties
+import java.io.FileInputStream
+
 android {
+
+    // ===== ASSINATURA RELEASE =====
+    def keystorePropertiesFile = rootProject.file("app/keystore.properties")
+    def keystoreProperties = new Properties()
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+
+    signingConfigs {
+        release {
+            storeFile file(keystoreProperties['storeFile'])
+            storePassword keystoreProperties['storePassword']
+            keyAlias keystoreProperties['keyAlias']
+            keyPassword keystoreProperties['keyPassword']
+        }
+    }
+
+    // ===== CONFIG APP =====
     namespace 'com.finance.tracker'
     compileSdk 34
 
@@ -15,8 +34,13 @@ android {
     }
 
     buildTypes {
+        debug {
+            // continua normal
+        }
         release {
+            signingConfig signingConfigs.release
             minifyEnabled false
+            shrinkResources false
         }
     }
 
