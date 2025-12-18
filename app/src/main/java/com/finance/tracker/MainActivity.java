@@ -27,6 +27,7 @@ public class MainActivity extends Activity {
 
         db = new DatabaseHelper(this);
 
+        // ===== ROOT =====
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
@@ -35,11 +36,19 @@ public class MainActivity extends Activity {
         // ===== CARD SALDO =====
         LinearLayout cardSaldo = new LinearLayout(this);
         cardSaldo.setOrientation(LinearLayout.VERTICAL);
-        cardSaldo.setPadding(40, 40, 40, 40);
+        cardSaldo.setPadding(48, 48, 48, 48);
         cardSaldo.setBackgroundColor(Color.WHITE);
 
+        LinearLayout.LayoutParams cardParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                );
+        cardParams.setMargins(0, 0, 0, 32);
+        cardSaldo.setLayoutParams(cardParams);
+
         txtSaldo = new TextView(this);
-        txtSaldo.setTextSize(24);
+        txtSaldo.setTextSize(26);
         txtSaldo.setGravity(Gravity.CENTER);
 
         cardSaldo.addView(txtSaldo);
@@ -48,7 +57,7 @@ public class MainActivity extends Activity {
         // ===== BOTÕES =====
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, 40, 0, 40);
+        row.setPadding(0, 0, 0, 32);
 
         Button btnGasto = new Button(this);
         btnGasto.setText("➖ Gasto");
@@ -59,6 +68,16 @@ public class MainActivity extends Activity {
         btnReceita.setText("➕ Receita");
         btnReceita.setBackgroundColor(Color.parseColor("#4CAF50"));
         btnReceita.setTextColor(Color.WHITE);
+
+        LinearLayout.LayoutParams btnParams =
+                new LinearLayout.LayoutParams(
+                        0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        1
+                );
+        btnParams.setMargins(8, 0, 8, 0);
+        btnGasto.setLayoutParams(btnParams);
+        btnReceita.setLayoutParams(btnParams);
 
         row.addView(btnGasto);
         row.addView(btnReceita);
@@ -90,6 +109,7 @@ public class MainActivity extends Activity {
 
         atualizarTela();
 
+        // ===== AÇÕES =====
         btnGasto.setOnClickListener(v -> {
             Intent i = new Intent(this, AddExpenseActivity.class);
             i.putExtra("type", "expense");
@@ -126,8 +146,8 @@ public class MainActivity extends Activity {
 
         // ===== RESUMO POR CATEGORIA =====
         summaryCategoryContainer.removeAllViews();
-
         Map<String, Double> resumo = db.getExpensesByCategory();
+
         for (String categoria : resumo.keySet()) {
             TextView tv = new TextView(this);
             tv.setText(categoria + ": R$ " + String.format("%.2f", resumo.get(categoria)));
