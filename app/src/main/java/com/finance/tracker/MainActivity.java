@@ -43,7 +43,7 @@ public class MainActivity extends Activity {
         cardSaldo.addView(txtSaldo);
         root.addView(cardSaldo);
 
-        // ===== BOTÕES GASTO / RECEITA =====
+        // ===== BOTÕES =====
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, 40, 0, 40);
@@ -62,18 +62,18 @@ public class MainActivity extends Activity {
         row.addView(btnReceita);
         root.addView(row);
 
-        // ===== BOTÃO PREMIUM =====
-        Button btnPremium = new Button(this);
-        btnPremium.setText("💎 Conheça o Premium");
-        btnPremium.setBackgroundColor(Color.parseColor("#FFC107"));
-        btnPremium.setTextColor(Color.BLACK);
-        root.addView(btnPremium);
+        // ===== BOTÃO QR CODE =====
+        Button btnQr = new Button(this);
+        btnQr.setText("📷 Ler nota fiscal (QR Code)");
+        btnQr.setBackgroundColor(Color.parseColor("#1976D2"));
+        btnQr.setTextColor(Color.WHITE);
+        root.addView(btnQr);
 
         // ===== TÍTULO HISTÓRICO =====
         TextView title = new TextView(this);
         title.setText("Histórico");
         title.setTextSize(18);
-        title.setPadding(0, 40, 0, 16);
+        title.setPadding(0, 32, 0, 16);
         root.addView(title);
 
         // ===== LISTA =====
@@ -98,8 +98,8 @@ public class MainActivity extends Activity {
             startActivityForResult(i, REQUEST_ADD);
         });
 
-        btnPremium.setOnClickListener(v -> {
-            Intent i = new Intent(this, PremiumActivity.class);
+        btnQr.setOnClickListener(v -> {
+            Intent i = new Intent(this, QrScanActivity.class);
             startActivity(i);
         });
     }
@@ -122,9 +122,7 @@ public class MainActivity extends Activity {
     private void atualizarTela() {
         double saldo = db.getBalance();
         txtSaldo.setText("Saldo\nR$ " + String.format("%.2f", saldo));
-        txtSaldo.setTextColor(
-                saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED
-        );
+        txtSaldo.setTextColor(saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED);
 
         listContainer.removeAllViews();
         List<String> list = db.getAllTransactions();
