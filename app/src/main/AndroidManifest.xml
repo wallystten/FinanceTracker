@@ -7,6 +7,7 @@
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
+        <!-- TELA PRINCIPAL -->
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -16,12 +17,19 @@
             </intent-filter>
         </activity>
 
+        <!-- ADICIONAR GASTO / RECEITA -->
         <activity
             android:name=".AddExpenseActivity"
             android:exported="false" />
 
+        <!-- TELA PREMIUM -->
         <activity
             android:name=".PremiumActivity"
+            android:exported="false" />
+
+        <!-- LEITOR DE QR CODE -->
+        <activity
+            android:name=".QrScanActivity"
             android:exported="false" />
 
     </application>
