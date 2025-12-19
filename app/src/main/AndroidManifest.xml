@@ -5,24 +5,25 @@
         android:allowBackup="true"
         android:label="Minhas Finanças"
         android:icon="@mipmap/ic_launcher"
-        android:theme="@android:style/Theme.Light">
+        android:roundIcon="@mipmap/ic_launcher"
+        android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
         <activity
             android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
-                <action android:name="android.intent.action.MAIN"/>
-                <category android:name="android.intent.category.LAUNCHER"/>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
 
         <activity
             android:name=".AddExpenseActivity"
-            android:exported="false"/>
+            android:exported="false" />
 
         <activity
             android:name=".PremiumActivity"
-            android:exported="false"/>
+            android:exported="false" />
 
     </application>
 
