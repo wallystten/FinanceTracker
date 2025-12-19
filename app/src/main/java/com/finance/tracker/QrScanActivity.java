@@ -1,16 +1,14 @@
 package com.finance.tracker;
 
 import android.Manifest;
-import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
-import android.view.Gravity;
-import android.widget.Button;
-import android.widget.LinearLayout;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
@@ -18,149 +16,92 @@ import com.journeyapps.barcodescanner.BarcodeCallback;
 import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
 
-public class QrScanActivity extends Activity {
+public class QrScanActivity extends AppCompatActivity {
 
-    private static final int CAMERA_REQUEST = 100;
+    private static final int CAMERA_PERMISSION_REQUEST = 100;
     private DecoratedBarcodeView barcodeView;
-    private boolean qrLido = false;
+    private boolean jaLeu = false; // trava leitura dupla
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_qr_scan);
 
-        barcodeView = new DecoratedBarcodeView(this);
-        setContentView(barcodeView);
+        barcodeView = findViewById(R.id.barcode_scanner);
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
-
             ActivityCompat.requestPermissions(
                     this,
                     new String[]{Manifest.permission.CAMERA},
-                    CAMERA_REQUEST
+                    CAMERA_PERMISSION_REQUEST
             );
         } else {
-            iniciarCamera();
+            iniciarScanner();
         }
     }
 
-    private void iniciarCamera() {
+    private void iniciarScanner() {
         barcodeView.decodeContinuous(new BarcodeCallback() {
             @Override
             public void barcodeResult(BarcodeResult result) {
-                if (result == null || qrLido) return;
 
-                qrLido = true;
+                if (result == null || result.getText() == null) return;
+                if (jaLeu) return; // evita loop
+
+                jaLeu = true;
                 barcodeView.pause();
 
-                String qrContent = result.getText();
+                String url = result.getText();
 
-                if (isNotaFiscal(qrContent)) {
-                    mostrarTelaNota(qrContent);
+                if (url.startsWith("http")) {
+                    Intent intent = new Intent(QrScanActivity.this, SefazWebActivity.class);
+                    intent.putExtra("url", url);
+                    startActivity(intent);
                 } else {
-                    Toast.makeText(
-                            QrScanActivity.this,
-                            "QR lido:\n" + qrContent,
-                            Toast.LENGTH_LONG
-                    ).show();
+                    Toast.makeText(QrScanActivity.this,
+                            "QR Code inválido",
+                            Toast.LENGTH_LONG).show();
                 }
-            }
-        });
-    }
 
-    private void mostrarTelaNota(String urlOriginal) {
-
-        String temp = urlOriginal.trim();
-        final String urlFinal;
-
-        if (!temp.startsWith("http://") && !temp.startsWith("https://")) {
-            urlFinal = "https://" + temp;
-        } else {
-            urlFinal = temp;
-        }
-
-        LinearLayout layout = new LinearLayout(this);
-        layout.setOrientation(LinearLayout.VERTICAL);
-        layout.setPadding(40, 40, 40, 40);
-        layout.setGravity(Gravity.CENTER);
-
-        Button btnAbrir = new Button(this);
-        btnAbrir.setText("🧾 Abrir nota fiscal (SEFAZ)");
-        btnAbrir.setOnClickListener(v -> {
-            try {
-                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(urlFinal));
-                startActivity(i);
-            } catch (Exception e) {
-                Toast.makeText(
-                        this,
-                        "Não foi possível abrir o navegador",
-                        Toast.LENGTH_LONG
-                ).show();
+                finish(); // encerra a câmera corretamente
             }
         });
 
-        Button btnVoltar = new Button(this);
-        btnVoltar.setText("⬅ Voltar");
-        btnVoltar.setOnClickListener(v -> finish());
-
-        layout.addView(btnAbrir);
-        layout.addView(btnVoltar);
-
-        setContentView(layout);
-
-        Toast.makeText(
-                this,
-                "Nota fiscal detectada\nImportação automática será Premium",
-                Toast.LENGTH_LONG
-        ).show();
-    }
-
-    private boolean isNotaFiscal(String content) {
-        if (content == null) return false;
-
-        try {
-            Uri uri = Uri.parse(content.startsWith("http") ? content : "https://" + content);
-            String host = uri.getHost();
-            if (host == null) return false;
-
-            host = host.toLowerCase();
-            return host.contains("sefaz")
-                    || host.contains("nfce")
-                    || host.contains("nfe")
-                    || host.contains("fazenda");
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String[] permissions,
-                                           int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
-        if (requestCode == CAMERA_REQUEST &&
-                grantResults.length > 0 &&
-                grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-
-            iniciarCamera();
-        } else {
-            Toast.makeText(this,
-                    "Permissão de câmera negada",
-                    Toast.LENGTH_LONG).show();
-            finish();
-        }
+        barcodeView.resume();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (barcodeView != null) barcodeView.resume();
+        if (barcodeView != null && !jaLeu) {
+            barcodeView.resume();
+        }
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (barcodeView != null) barcodeView.pause();
+        if (barcodeView != null) {
+            barcodeView.pause();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           @NonNull String[] permissions,
+                                           @NonNull int[] grantResults) {
+
+        if (requestCode == CAMERA_PERMISSION_REQUEST) {
+            if (grantResults.length > 0
+                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                iniciarScanner();
+            } else {
+                Toast.makeText(this,
+                        "Permissão da câmera negada",
+                        Toast.LENGTH_LONG).show();
+                finish();
+            }
+        }
     }
 }
