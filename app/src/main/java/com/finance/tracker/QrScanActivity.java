@@ -60,7 +60,7 @@ public class QrScanActivity extends Activity {
                 } else {
                     Toast.makeText(
                             QrScanActivity.this,
-                            "QR comum:\n" + qrContent,
+                            "QR lido:\n" + qrContent,
                             Toast.LENGTH_LONG
                     ).show();
                 }
@@ -68,8 +68,13 @@ public class QrScanActivity extends Activity {
         });
     }
 
-    // 🧾 Tela com botão para abrir a nota
-    private void mostrarTelaNota(String url) {
+    private void mostrarTelaNota(String urlOriginal) {
+
+        // 🔧 CORREÇÃO CRÍTICA
+        String url = urlOriginal.trim();
+        if (!url.startsWith("http://") && !url.startsWith("https://")) {
+            url = "https://" + url;
+        }
 
         LinearLayout layout = new LinearLayout(this);
         layout.setOrientation(LinearLayout.VERTICAL);
@@ -79,8 +84,16 @@ public class QrScanActivity extends Activity {
         Button btnAbrir = new Button(this);
         btnAbrir.setText("🧾 Abrir nota fiscal (SEFAZ)");
         btnAbrir.setOnClickListener(v -> {
-            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-            startActivity(i);
+            try {
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(i);
+            } catch (Exception e) {
+                Toast.makeText(
+                        this,
+                        "Não foi possível abrir o navegador",
+                        Toast.LENGTH_LONG
+                ).show();
+            }
         });
 
         Button btnVoltar = new Button(this);
@@ -94,7 +107,7 @@ public class QrScanActivity extends Activity {
 
         Toast.makeText(
                 this,
-                "Nota fiscal detectada\nImportação automática disponível no Premium",
+                "Nota fiscal detectada\nImportação automática será Premium",
                 Toast.LENGTH_LONG
         ).show();
     }
@@ -103,7 +116,7 @@ public class QrScanActivity extends Activity {
         if (content == null) return false;
 
         try {
-            Uri uri = Uri.parse(content);
+            Uri uri = Uri.parse(content.startsWith("http") ? content : "https://" + content);
             String host = uri.getHost();
             if (host == null) return false;
 
