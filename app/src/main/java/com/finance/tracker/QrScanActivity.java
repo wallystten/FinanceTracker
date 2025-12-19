@@ -6,6 +6,9 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.view.Gravity;
+import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.Toast;
 
 import androidx.core.app.ActivityCompat;
@@ -19,6 +22,7 @@ public class QrScanActivity extends Activity {
 
     private static final int CAMERA_REQUEST = 100;
     private DecoratedBarcodeView barcodeView;
+    private boolean qrLido = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,27 +48,15 @@ public class QrScanActivity extends Activity {
         barcodeView.decodeContinuous(new BarcodeCallback() {
             @Override
             public void barcodeResult(BarcodeResult result) {
-                if (result == null) return;
+                if (result == null || qrLido) return;
 
+                qrLido = true;
                 barcodeView.pause();
 
                 String qrContent = result.getText();
 
                 if (isNotaFiscal(qrContent)) {
-
-                    Toast.makeText(
-                            QrScanActivity.this,
-                            "🧾 Nota fiscal detectada\nImportação automática disponível no Premium",
-                            Toast.LENGTH_LONG
-                    ).show();
-
-                    // 🔗 Abre o site oficial da nota
-                    Intent browserIntent = new Intent(
-                            Intent.ACTION_VIEW,
-                            Uri.parse(qrContent)
-                    );
-                    startActivity(browserIntent);
-
+                    mostrarTelaNota(qrContent);
                 } else {
                     Toast.makeText(
                             QrScanActivity.this,
@@ -72,13 +64,41 @@ public class QrScanActivity extends Activity {
                             Toast.LENGTH_LONG
                     ).show();
                 }
-
-                finish();
             }
         });
     }
 
-    // 🔍 Detecta QR de nota fiscal brasileira
+    // 🧾 Tela com botão para abrir a nota
+    private void mostrarTelaNota(String url) {
+
+        LinearLayout layout = new LinearLayout(this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+        layout.setPadding(40, 40, 40, 40);
+        layout.setGravity(Gravity.CENTER);
+
+        Button btnAbrir = new Button(this);
+        btnAbrir.setText("🧾 Abrir nota fiscal (SEFAZ)");
+        btnAbrir.setOnClickListener(v -> {
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+            startActivity(i);
+        });
+
+        Button btnVoltar = new Button(this);
+        btnVoltar.setText("⬅ Voltar");
+        btnVoltar.setOnClickListener(v -> finish());
+
+        layout.addView(btnAbrir);
+        layout.addView(btnVoltar);
+
+        setContentView(layout);
+
+        Toast.makeText(
+                this,
+                "Nota fiscal detectada\nImportação automática disponível no Premium",
+                Toast.LENGTH_LONG
+        ).show();
+    }
+
     private boolean isNotaFiscal(String content) {
         if (content == null) return false;
 
@@ -88,7 +108,6 @@ public class QrScanActivity extends Activity {
             if (host == null) return false;
 
             host = host.toLowerCase();
-
             return host.contains("sefaz")
                     || host.contains("nfce")
                     || host.contains("nfe")
@@ -120,12 +139,12 @@ public class QrScanActivity extends Activity {
     @Override
     protected void onResume() {
         super.onResume();
-        barcodeView.resume();
+        if (barcodeView != null) barcodeView.resume();
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        barcodeView.pause();
+        if (barcodeView != null) barcodeView.pause();
     }
 }
