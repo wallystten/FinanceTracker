@@ -8,20 +8,20 @@ import android.widget.Toast;
 
 public class QrScanActivity extends Activity {
 
-    private static final int QR_REQUEST_CODE = 1001;
+    private static final int ZXING_REQUEST = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        abrirScanner();
+        abrirLeitorZXing();
     }
 
-    private void abrirScanner() {
+    private void abrirLeitorZXing() {
         try {
             Intent intent = new Intent("com.google.zxing.client.android.SCAN");
             intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, QR_REQUEST_CODE);
+            startActivityForResult(intent, ZXING_REQUEST);
         } catch (Exception e) {
             Toast.makeText(
                     this,
@@ -36,26 +36,22 @@ public class QrScanActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == QR_REQUEST_CODE) {
-
+        if (requestCode == ZXING_REQUEST) {
             if (resultCode == RESULT_OK && data != null) {
+                String qrResult = data.getStringExtra("SCAN_RESULT");
 
-                String qrContent = data.getStringExtra("SCAN_RESULT");
-
-                if (qrContent != null && qrContent.startsWith("http")) {
-                    Intent browserIntent =
-                            new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
-                    startActivity(browserIntent);
+                if (qrResult != null && qrResult.startsWith("http")) {
+                    abrirNoNavegador(qrResult);
                 } else {
-                    Toast.makeText(
-                            this,
-                            "QR Code lido, mas não é um link válido.",
-                            Toast.LENGTH_LONG
-                    ).show();
+                    Toast.makeText(this, "QR Code inválido", Toast.LENGTH_SHORT).show();
                 }
             }
-
             finish();
         }
+    }
+
+    private void abrirNoNavegador(String url) {
+        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+        startActivity(intent);
     }
 }
