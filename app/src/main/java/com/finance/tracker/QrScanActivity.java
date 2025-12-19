@@ -51,11 +51,20 @@ public class QrScanActivity extends Activity {
                 String qrContent = result.getText();
 
                 if (isNotaFiscal(qrContent)) {
+
                     Toast.makeText(
                             QrScanActivity.this,
-                            "🧾 Nota fiscal detectada\nFunção Premium",
+                            "🧾 Nota fiscal detectada\nImportação automática disponível no Premium",
                             Toast.LENGTH_LONG
                     ).show();
+
+                    // 🔗 Abre o site oficial da nota
+                    Intent browserIntent = new Intent(
+                            Intent.ACTION_VIEW,
+                            Uri.parse(qrContent)
+                    );
+                    startActivity(browserIntent);
+
                 } else {
                     Toast.makeText(
                             QrScanActivity.this,
