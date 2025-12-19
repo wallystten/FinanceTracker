@@ -70,10 +70,13 @@ public class QrScanActivity extends Activity {
 
     private void mostrarTelaNota(String urlOriginal) {
 
-        // 🔧 CORREÇÃO CRÍTICA
-        String url = urlOriginal.trim();
-        if (!url.startsWith("http://") && !url.startsWith("https://")) {
-            url = "https://" + url;
+        String temp = urlOriginal.trim();
+        final String urlFinal;
+
+        if (!temp.startsWith("http://") && !temp.startsWith("https://")) {
+            urlFinal = "https://" + temp;
+        } else {
+            urlFinal = temp;
         }
 
         LinearLayout layout = new LinearLayout(this);
@@ -85,7 +88,7 @@ public class QrScanActivity extends Activity {
         btnAbrir.setText("🧾 Abrir nota fiscal (SEFAZ)");
         btnAbrir.setOnClickListener(v -> {
             try {
-                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(urlFinal));
                 startActivity(i);
             } catch (Exception e) {
                 Toast.makeText(
