@@ -7,14 +7,17 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId      applicationId "c
-        minSdk ck
+        applicationId "com.finance.tracker"
+        minSdk 21
         targetSdk 34
         versionCode 1
         versionName "1.0"
     }
 
     buildTypes {
+        debug {
+            minifyEnabled false
+        }
         release {
             minifyEnabled false
         }
@@ -26,23 +29,12 @@ android {
     }
 }
 
-/**
- * 🔒 FORÇA UMA ÚNICA VERSÃO DO KOTLIN
- * Evita erro "Duplicate class kotlin.*"
- */
-configurations.all {
-    resolutionStrategy {
-        force "org.jetbrains.kotlin:kotlin-stdlib:1.8.22"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk7:1.8.22"
-        force "org.jetbrains.kotlin:kotlin-stdlib-jdk8:1.8.22"
-    }
-}
 dependencies {
 
-    // AppCompat (base do app)
+    // Base
     implementation 'androidx.appcompat:appcompat:1.6.1'
 
-    // ConstraintLayout (layout do QR)
+    // Layout
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'
 
     // ===== CAMERA X =====
