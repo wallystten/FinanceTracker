@@ -139,7 +139,7 @@ public class QrScanActivity extends AppCompatActivity {
             startCamera();
         } else {
             Toast.makeText(this, "Permissão da câmera negada", Toast.LENGTH_LONG).show();
-            finish();
+            ;
         }
     }
 }
