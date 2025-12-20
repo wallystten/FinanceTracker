@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.text.InputType;
 import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
@@ -19,65 +18,57 @@ public class NfceAddActivity extends Activity {
 
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
-        root.setPadding(40, 40, 40, 40);
-        root.setBackgroundColor(Color.WHITE);
+        root.setPadding(48, 48, 48, 48);
+        root.setBackgroundColor(Color.parseColor("#F2F2F2"));
 
+        // TÍTULO
         TextView title = new TextView(this);
-        title.setText("Registrar gasto da NFC-e");
+        title.setText("Confirmar Nota Fiscal");
         title.setTextSize(20);
         title.setGravity(Gravity.CENTER);
-        title.setPadding(0, 0, 0, 32);
+        title.setPadding(0, 0, 0, 40);
         root.addView(title);
 
-        TextView info = new TextView(this);
-        info.setText(
-                "A nota foi aberta no site da SEFAZ.\n" +
-                "Informe abaixo o valor total exibido."
-        );
-        info.setPadding(0, 0, 0, 24);
-        root.addView(info);
-
+        // VALOR
         EditText edtValor = new EditText(this);
-        edtValor.setHint("Valor total (ex: 125.80)");
-        edtValor.setInputType(
-                InputType.TYPE_CLASS_NUMBER |
-                InputType.TYPE_NUMBER_FLAG_DECIMAL
-        );
+        edtValor.setHint("Valor total da nota (R$)");
+        edtValor.setInputType(android.text.InputType.TYPE_CLASS_NUMBER
+                | android.text.InputType.TYPE_NUMBER_FLAG_DECIMAL);
         root.addView(edtValor);
 
+        // CATEGORIA
         EditText edtCategoria = new EditText(this);
-        edtCategoria.setHint("Categoria (ex: Combustível)");
+        edtCategoria.setHint("Categoria (ex: Supermercado)");
+        edtCategoria.setPadding(0, 32, 0, 32);
         root.addView(edtCategoria);
 
+        // BOTÃO SALVAR
         Button btnSalvar = new Button(this);
         btnSalvar.setText("Salvar gasto");
         btnSalvar.setBackgroundColor(Color.parseColor("#1976D2"));
         btnSalvar.setTextColor(Color.WHITE);
-        btnSalvar.setPadding(0, 24, 0, 24);
         root.addView(btnSalvar);
 
         setContentView(root);
 
         btnSalvar.setOnClickListener(v -> {
-            double valor = 0;
-            try {
-                valor = Double.parseDouble(
-                        edtValor.getText().toString().replace(",", ".")
-                );
-            } catch (Exception ignored) {}
+            String valorStr = edtValor.getText().toString().trim();
+            String categoria = edtCategoria.getText().toString().trim();
 
-            Intent result = new Intent();
-            result.putExtra("value", valor);
-            result.putExtra("type", "expense");
-            result.putExtra("bank", "NFC-e");
-            result.putExtra(
-                    "category",
-                    edtCategoria.getText().toString().isEmpty()
-                            ? "Nota Fiscal"
-                            : edtCategoria.getText().toString()
-            );
+            if (valorStr.isEmpty()) {
+                edtValor.setError("Informe o valor");
+                return;
+            }
 
-            setResult(RESULT_OK, result);
+            double valor = Double.parseDouble(valorStr);
+
+            Intent data = new Intent();
+            data.putExtra("value", valor);
+            data.putExtra("type", "expense");
+            data.putExtra("bank", "NFC-e");
+            data.putExtra("category", categoria.isEmpty() ? "Nota Fiscal" : categoria);
+
+            setResult(RESULT_OK, data);
             finish();
         });
     }
