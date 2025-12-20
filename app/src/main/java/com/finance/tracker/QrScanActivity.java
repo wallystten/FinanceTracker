@@ -6,53 +6,50 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
+
 public class QrScanActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Usa leitor externo (ZXing via Intent)
-        try {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, 100);
-        } catch (Exception e) {
-            Toast.makeText(this,
-                    "Leitor de QR Code não encontrado. Instale um leitor.",
-                    Toast.LENGTH_LONG).show();
-            finish();
-        }
+        // Inicia leitor de QR Code
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
+        integrator.setPrompt("Aponte para o QR Code da Nota Fiscal");
+        integrator.setBeepEnabled(true);
+        integrator.setOrientationLocked(false);
+        integrator.initiateScan();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        IntentResult result = IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
-            String qrContent = data.getStringExtra("SCAN_RESULT");
+        if (result != null) {
+            if (result.getContents() != null) {
+                String url = result.getContents();
 
-            if (qrContent != null && qrContent.startsWith("http")) {
+                try {
+                    // Abre o site da SEFAZ
+                    Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                    startActivity(browserIntent);
 
-                // 🔹 REGISTRA GASTO AUTOMATICAMENTE
-                DatabaseHelper db = new DatabaseHelper(this);
-                db.addTransaction(
-                        0.0,                 // valor provisório
-                        "expense",            // tipo
-                        "Nota Fiscal",        // banco
-                        "Alimentação"         // categoria
-                );
+                } catch (Exception e) {
+                    Toast.makeText(this, "Erro ao abrir a nota fiscal", Toast.LENGTH_SHORT).show();
+                }
 
-                // 🔹 ABRE SITE DA SEFAZ
-                Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
-                startActivity(browser);
-
-                Toast.makeText(this,
-                        "Nota fiscal registrada. Edite o valor depois.",
-                        Toast.LENGTH_LONG).show();
+            } else {
+                Toast.makeText(this, "Leitura cancelada", Toast.LENGTH_SHORT).show();
             }
-        }
 
-        finish();
+            // 🔴 ESSA LINHA É A CHAVE DO PROBLEMA
+            finish();
+
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
+        }
     }
-}
+}    
