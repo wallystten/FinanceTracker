@@ -2,43 +2,60 @@ package com.finance.tracker;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Color;
 import android.os.Bundle;
+import android.view.Gravity;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 
 public class NfceAddActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_nfce_add);
 
-        EditText edtValor = findViewById(R.id.edtValor);
-        EditText edtCategoria = findViewById(R.id.edtCategoria);
-        EditText edtPagamento = findViewById(R.id.edtPagamento);
-        TextView txtChave = findViewById(R.id.txtChave);
-        Button btnSalvar = findViewById(R.id.btnSalvar);
+        LinearLayout root = new LinearLayout(this);
+        root.setOrientation(LinearLayout.VERTICAL);
+        root.setPadding(40, 40, 40, 40);
+        root.setBackgroundColor(Color.WHITE);
 
-        String chave = getIntent().getStringExtra("chave_nfce");
-        if (chave != null) {
-            txtChave.setText("Chave NFC-e:\n" + chave);
-        }
+        TextView title = new TextView(this);
+        title.setText("Adicionar gasto da NFC-e");
+        title.setTextSize(20);
+        title.setGravity(Gravity.CENTER);
+        root.addView(title);
+
+        EditText edtValor = new EditText(this);
+        edtValor.setHint("Valor (ex: 125.80)");
+        root.addView(edtValor);
+
+        EditText edtCategoria = new EditText(this);
+        edtCategoria.setHint("Categoria (ex: Combustível)");
+        root.addView(edtCategoria);
+
+        Button btnSalvar = new Button(this);
+        btnSalvar.setText("Salvar gasto");
+        btnSalvar.setBackgroundColor(Color.parseColor("#1976D2"));
+        btnSalvar.setTextColor(Color.WHITE);
+        root.addView(btnSalvar);
+
+        setContentView(root);
 
         btnSalvar.setOnClickListener(v -> {
-            if (edtValor.getText().toString().isEmpty()) {
-                Toast.makeText(this, "Informe o valor", Toast.LENGTH_SHORT).show();
-                return;
-            }
+            double valor = 0;
+            try {
+                valor = Double.parseDouble(edtValor.getText().toString());
+            } catch (Exception ignored) {}
 
-            Intent data = new Intent();
-            data.putExtra("value", Double.parseDouble(edtValor.getText().toString()));
-            data.putExtra("type", "expense");
-            data.putExtra("bank", edtPagamento.getText().toString());
-            data.putExtra("category", edtCategoria.getText().toString());
+            Intent result = new Intent();
+            result.putExtra("value", valor);
+            result.putExtra("type", "expense");
+            result.putExtra("bank", "NFC-e");
+            result.putExtra("category", edtCategoria.getText().toString());
 
-            setResult(RESULT_OK, data);
+            setResult(RESULT_OK, result);
             finish();
         });
     }
