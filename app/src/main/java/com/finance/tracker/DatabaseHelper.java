@@ -7,9 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
@@ -42,7 +40,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    // Salvar transação COM categoria
     public void addTransaction(double value, String type, String bank, String category) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
@@ -53,11 +50,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         cv.put("date", System.currentTimeMillis());
         db.insert(TABLE, null, cv);
         db.close();
-    }
-
-    // Compatibilidade
-    public void addTransaction(double value, String type, String bank) {
-        addTransaction(value, type, bank, "Outros");
     }
 
     public double getBalance() {
@@ -73,7 +65,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return total;
     }
 
-    // Lista com banco + categoria
+    // 🔹 HISTÓRICO COM ÍCONE PARA QR CODE
     public List<String> getAllTransactions() {
         List<String> list = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
@@ -89,11 +81,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String bank = c.getString(2);
             String category = c.getString(3);
 
+            boolean isQr = "Nota Fiscal".equals(bank);
+
+            String icon = isQr ? "🧾 " : "";
+            String signal = type.equals("income") ? "➕ " : "➖ ";
+
             String line =
-                    (type.equals("income") ? "➕ " : "➖ ") +
-                            "R$ " + value +
-                            " • " + bank +
-                            " • " + category;
+                    icon +
+                    signal +
+                    "R$ " + String.format("%.2f", value) +
+                    " • " + bank +
+                    " • " + category;
 
             list.add(line);
         }
@@ -101,29 +99,5 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         c.close();
         db.close();
         return list;
-    }
-
-    // ✅ Total gasto por categoria (somente despesas)
-    public Map<String, Double> getExpensesByCategory() {
-        Map<String, Double> map = new HashMap<>();
-        SQLiteDatabase db = getReadableDatabase();
-
-        Cursor c = db.rawQuery(
-                "SELECT category, SUM(value) " +
-                        "FROM " + TABLE +
-                        " WHERE type = 'expense' " +
-                        "GROUP BY category",
-                null
-        );
-
-        while (c.moveToNext()) {
-            String category = c.getString(0);
-            double total = c.getDouble(1);
-            map.put(category, total);
-        }
-
-        c.close();
-        db.close();
-        return map;
     }
 }
