@@ -1,9 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.finance.tracker">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Permissão para leitura de QR Code -->
-    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
         android:allowBackup="true"
@@ -12,35 +10,26 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <!-- Tela principal -->
-        <activity
-            android:name=".MainActivity"
-            android:exported="true">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
-
-        <!-- Leitor de QR Code (interno do app) -->
         <activity
             android:name=".QrScanActivity"
             android:exported="false" />
 
-        <!-- Tela para salvar gasto vindo da NFC-e -->
         <activity
-            android:name=".NfceAddActivity"
-            android:exported="false" />
+            android:name=".MainActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
 
-        <!-- Tela manual de adicionar gasto/receita -->
         <activity
             android:name=".AddExpenseActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
-        <!-- Premium (se existir no projeto) -->
         <activity
             android:name=".PremiumActivity"
-            android:exported="false" />
+            android:exported="false"/>
 
     </application>
 
