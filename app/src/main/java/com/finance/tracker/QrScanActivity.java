@@ -8,30 +8,21 @@ import android.widget.Toast;
 
 public class QrScanActivity extends Activity {
 
-    private static final int QR_REQUEST = 1001;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-
+        // Usa leitor nativo via intent (sem ZXing externo obrigatório)
         try {
-            startActivityForResult(intent, QR_REQUEST);
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            startActivityForResult(intent, 1001);
         } catch (Exception e) {
             Toast.makeText(
                     this,
-                    "Leitor de QR Code não encontrado. Instale o ZXing.",
+                    "Leitor de QR não disponível. Use a câmera do celular.",
                     Toast.LENGTH_LONG
             ).show();
-
-            Intent playStoreIntent = new Intent(
-                    Intent.ACTION_VIEW,
-                    Uri.parse("https://play.google.com/store/apps/details?id=com.google.zxing.client.android")
-            );
-            startActivity(playStoreIntent);
-
             finish();
         }
     }
@@ -40,14 +31,23 @@ public class QrScanActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == QR_REQUEST && resultCode == RESULT_OK && data != null) {
-            String result = data.getStringExtra("SCAN_RESULT");
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
+            String qrContent = data.getStringExtra("SCAN_RESULT");
 
-            if (result != null && result.startsWith("http")) {
-                startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse(result)));
+            if (qrContent != null && qrContent.startsWith("http")) {
+                // Abre site da SEFAZ
+                Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
+                startActivity(browser);
+
+                // Depois abre tela de adicionar gasto manualmente
+                Intent i = new Intent(this, NfceAddActivity.class);
+                i.putExtra("url", qrContent);
+                startActivity(i);
             }
-        }
 
-        finish();
+            finish();
+        } else {
+            finish();
+        }
     }
 }
