@@ -1,14 +1,15 @@
 package com.finance.tracker;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AppCompatActivity;
 import androidx.camera.core.CameraSelector;
 import androidx.camera.core.ImageAnalysis;
 import androidx.camera.core.ImageProxy;
@@ -19,23 +20,33 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.mlkit.vision.barcode.Barcode;
 import com.google.mlkit.vision.barcode.BarcodeScanner;
 import com.google.mlkit.vision.barcode.BarcodeScanning;
+import com.google.mlkit.vision.barcode.common.Barcode;
 import com.google.mlkit.vision.common.InputImage;
 
 import java.util.List;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
-public class QrScanActivity extends AppCompatActivity {
+public class QrScanActivity extends Activity {
 
     private static final int CAMERA_PERMISSION = 1001;
-    private boolean scanned = false;
+
+    private PreviewView previewView;
+    private ExecutorService cameraExecutor;
+    private BarcodeScanner barcodeScanner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_qr_scan);
+
+        previewView = new PreviewView(this);
+        setContentView(previewView);
+
+        barcodeScanner = BarcodeScanning.getClient();
+        cameraExecutor = Executors.newSingleThreadExecutor();
 
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 == PackageManager.PERMISSION_GRANTED) {
@@ -50,8 +61,6 @@ public class QrScanActivity extends AppCompatActivity {
     }
 
     private void startCamera() {
-        PreviewView previewView = findViewById(R.id.previewView);
-
         ListenableFuture<ProcessCameraProvider> cameraProviderFuture =
                 ProcessCameraProvider.getInstance(this);
 
@@ -67,12 +76,7 @@ public class QrScanActivity extends AppCompatActivity {
                                 .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
                                 .build();
 
-                BarcodeScanner scanner = BarcodeScanning.getClient();
-
-                imageAnalysis.setAnalyzer(
-                        ContextCompat.getMainExecutor(this),
-                        imageProxy -> processImage(scanner, imageProxy)
-                );
+                imageAnalysis.setAnalyzer(cameraExecutor, this::analyzeImage);
 
                 CameraSelector cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA;
 
@@ -90,39 +94,38 @@ public class QrScanActivity extends AppCompatActivity {
         }, ContextCompat.getMainExecutor(this));
     }
 
-    private void processImage(BarcodeScanner scanner, ImageProxy imageProxy) {
-        if (scanned) {
+    private void analyzeImage(@NonNull ImageProxy imageProxy) {
+        if (imageProxy.getImage() == null) {
             imageProxy.close();
             return;
         }
 
-        if (imageProxy.getImage() != null) {
-            InputImage image =
-                    InputImage.fromMediaImage(
-                            imageProxy.getImage(),
-                            imageProxy.getImageInfo().getRotationDegrees()
-                    );
+        InputImage image = InputImage.fromMediaImage(
+                imageProxy.getImage(),
+                imageProxy.getImageInfo().getRotationDegrees()
+        );
 
-            scanner.process(image)
-                    .addOnSuccessListener(barcodes -> handleResult(barcodes))
-                    .addOnCompleteListener(task -> imageProxy.close());
-        } else {
-            imageProxy.close();
-        }
+        barcodeScanner.process(image)
+                .addOnSuccessListener(this::handleResult)
+                .addOnFailureListener(e ->
+                        Log.e("QR_SCAN", "Erro ao ler QR", e))
+                .addOnCompleteListener(task -> imageProxy.close());
     }
 
     private void handleResult(List<Barcode> barcodes) {
         if (barcodes.isEmpty()) return;
 
-        scanned = true;
-        String url = barcodes.get(0).getRawValue();
+        Barcode barcode = barcodes.get(0);
+        String value = barcode.getRawValue();
 
-        Toast.makeText(this, "QR Code lido!", Toast.LENGTH_SHORT).show();
-
-        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
-        startActivity(intent);
-
-        finish();
+        if (value != null && value.startsWith("http")) {
+            runOnUiThread(() -> {
+                Toast.makeText(this, "QR lido com sucesso", Toast.LENGTH_SHORT).show();
+                Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(value));
+                startActivity(intent);
+                finish();
+            });
+        }
     }
 
     @Override
@@ -131,15 +134,19 @@ public class QrScanActivity extends AppCompatActivity {
             @NonNull String[] permissions,
             @NonNull int[] grantResults
     ) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         if (requestCode == CAMERA_PERMISSION &&
                 grantResults.length > 0 &&
                 grantResults[0] == PackageManager.PERMISSION_GRANTED) {
             startCamera();
         } else {
-            Toast.makeText(this, "Permissão da câmera negada", Toast.LENGTH_LONG).show();
-            ;
+            Toast.makeText(this, "Permissão de câmera negada", Toast.LENGTH_LONG).show();
+            finish();
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (cameraExecutor != null) cameraExecutor.shutdown();
     }
 }
