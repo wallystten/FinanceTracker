@@ -12,7 +12,7 @@ import java.util.List;
 public class DatabaseHelper extends SQLiteOpenHelper {
 
     private static final String DATABASE_NAME = "financas.db";
-    private static final int DATABASE_VERSION = 3;
+    private static final int DATABASE_VERSION = 4; // ⬅️ aumentou
 
     public static final String TABLE = "transactions";
 
@@ -29,6 +29,7 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "type TEXT," +
                         "bank TEXT," +
                         "category TEXT," +
+                        "note_url TEXT," + // ⬅️ NOVO
                         "date INTEGER" +
                         ")"
         );
@@ -40,16 +41,23 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         onCreate(db);
     }
 
-    public void addTransaction(double value, String type, String bank, String category) {
+    // Salvar transação COM nota fiscal
+    public void addTransaction(double value, String type, String bank, String category, String noteUrl) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
         cv.put("value", value);
         cv.put("type", type);
         cv.put("bank", bank);
         cv.put("category", category);
+        cv.put("note_url", noteUrl);
         cv.put("date", System.currentTimeMillis());
         db.insert(TABLE, null, cv);
         db.close();
+    }
+
+    // Compatibilidade antiga
+    public void addTransaction(double value, String type, String bank, String category) {
+        addTransaction(value, type, bank, category, null);
     }
 
     public double getBalance() {
@@ -65,13 +73,12 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return total;
     }
 
-    // 🔹 HISTÓRICO COM ÍCONE PARA QR CODE
     public List<String> getAllTransactions() {
         List<String> list = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor c = db.rawQuery(
-                "SELECT value, type, bank, category FROM " + TABLE + " ORDER BY date DESC",
+                "SELECT value, type, bank, category, note_url FROM " + TABLE + " ORDER BY date DESC",
                 null
         );
 
@@ -80,18 +87,17 @@ public class DatabaseHelper extends SQLiteOpenHelper {
             String type = c.getString(1);
             String bank = c.getString(2);
             String category = c.getString(3);
-
-            boolean isQr = "Nota Fiscal".equals(bank);
-
-            String icon = isQr ? "🧾 " : "";
-            String signal = type.equals("income") ? "➕ " : "➖ ";
+            String noteUrl = c.getString(4);
 
             String line =
-                    icon +
-                    signal +
-                    "R$ " + String.format("%.2f", value) +
+                    (type.equals("income") ? "➕ " : "➖ ") +
+                    "R$ " + value +
                     " • " + bank +
                     " • " + category;
+
+            if (noteUrl != null) {
+                line += "\n📄 Nota fiscal salva";
+            }
 
             list.add(line);
         }
