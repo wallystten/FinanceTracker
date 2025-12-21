@@ -27,24 +27,20 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "type TEXT," +
                         "bank TEXT," +
                         "category TEXT," +
-                        "status TEXT)"
+                        "status TEXT" +
+                        ")"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS transactions");
-        onCreate(db);
+        if (oldVersion < 2) {
+            db.execSQL("ALTER TABLE transactions ADD COLUMN status TEXT");
+        }
     }
 
-    // ✅ MÉTODO PADRÃO (AGORA COM STATUS)
-    public void addTransaction(
-            double value,
-            String type,
-            String bank,
-            String category,
-            String status
-    ) {
+    // ===== INSERÇÃO =====
+    public void addTransaction(double value, String type, String bank, String category, String status) {
         SQLiteDatabase db = getWritableDatabase();
         ContentValues cv = new ContentValues();
 
@@ -57,12 +53,15 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         db.insert("transactions", null, cv);
     }
 
+    // ===== SALDO =====
     public double getBalance() {
-        SQLiteDatabase db = getReadableDatabase();
-        Cursor c = db.rawQuery(
-                "SELECT value, type FROM transactions", null);
-
         double balance = 0;
+        SQLiteDatabase db = getReadableDatabase();
+
+        Cursor c = db.rawQuery(
+                "SELECT value, type FROM transactions WHERE status='CONFIRMED'",
+                null
+        );
 
         while (c.moveToNext()) {
             double value = c.getDouble(0);
@@ -79,53 +78,55 @@ public class DatabaseHelper extends SQLiteOpenHelper {
         return balance;
     }
 
+    // ===== LISTA SIMPLES =====
     public List<String> getAllTransactions() {
         List<String> list = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor c = db.rawQuery(
-                "SELECT value, bank, category, status FROM transactions ORDER BY id DESC",
+                "SELECT value, type, category FROM transactions ORDER BY id DESC",
                 null
         );
 
         while (c.moveToNext()) {
             double value = c.getDouble(0);
-            String bank = c.getString(1);
+            String type = c.getString(1);
             String category = c.getString(2);
-            String status = c.getString(3);
 
-            if ("pendente".equals(status)) {
-                list.add("Nota fiscal (pendente) - " + bank);
-            } else {
-                list.add("R$ " + value + " - " + bank + " (" + category + ")");
-            }
+            String line = (type.equals("income") ? "+ " : "- ") +
+                    "R$ " + String.format("%.2f", value) +
+                    " • " + category;
+
+            list.add(line);
         }
 
         c.close();
         return list;
     }
-}
-public List<String[]> getAllTransactionsDetailed() {
-    List<String[]> list = new ArrayList<>();
-    SQLiteDatabase db = getReadableDatabase();
 
-    Cursor c = db.rawQuery(
-            "SELECT value, type, bank, category, status FROM transactions ORDER BY id DESC",
-            null
-    );
+    // ===== LISTA DETALHADA (🔥 ERA O MÉTODO QUE FALTAVA) =====
+    public List<String[]> getAllTransactionsDetailed() {
+        List<String[]> list = new ArrayList<>();
+        SQLiteDatabase db = getReadableDatabase();
 
-    while (c.moveToNext()) {
-        String[] item = new String[5];
+        Cursor c = db.rawQuery(
+                "SELECT value, type, bank, category, status FROM transactions ORDER BY id DESC",
+                null
+        );
 
-        item[0] = String.valueOf(c.getDouble(0)); // value
-        item[1] = c.getString(1);                 // type
-        item[2] = c.getString(2);                 // bank
-        item[3] = c.getString(3);                 // category
-        item[4] = c.getString(4);                 // status
+        while (c.moveToNext()) {
+            String[] item = new String[5];
 
-        list.add(item);
+            item[0] = String.valueOf(c.getDouble(0));
+            item[1] = c.getString(1);
+            item[2] = c.getString(2);
+            item[3] = c.getString(3);
+            item[4] = c.getString(4);
+
+            list.add(item);
+        }
+
+        c.close();
+        return list;
     }
-
-    c.close();
-    return list;
 }
