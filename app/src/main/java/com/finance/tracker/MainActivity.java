@@ -14,12 +14,10 @@ import java.util.List;
 public class MainActivity extends Activity {
 
     private static final int REQUEST_ADD = 1;
-    private static final int REQUEST_QR = 2;
 
     private DatabaseHelper db;
     private TextView txtSaldo;
     private LinearLayout listContainer;
-    private Button btnQr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,6 +25,7 @@ public class MainActivity extends Activity {
 
         db = new DatabaseHelper(this);
 
+        // ===== ROOT =====
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
@@ -45,37 +44,28 @@ public class MainActivity extends Activity {
         cardSaldo.addView(txtSaldo);
         root.addView(cardSaldo);
 
-        // ===== BOTÕES =====
+        // ===== BOTÕES RECEITA / GASTO =====
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
         row.setPadding(0, 40, 0, 40);
 
         Button btnGasto = new Button(this);
-        btnGasto.setText("➖ GASTO");
+        btnGasto.setText("➖ Gasto");
         btnGasto.setBackgroundColor(Color.parseColor("#F44336"));
         btnGasto.setTextColor(Color.WHITE);
 
         Button btnReceita = new Button(this);
-        btnReceita.setText("➕ RECEITA");
+        btnReceita.setText("➕ Receita");
         btnReceita.setBackgroundColor(Color.parseColor("#4CAF50"));
         btnReceita.setTextColor(Color.WHITE);
-
-        LinearLayout.LayoutParams btnParams =
-                new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-        btnParams.setMargins(0, 0, 16, 0);
-        btnGasto.setLayoutParams(btnParams);
-
-        LinearLayout.LayoutParams btnParams2 =
-                new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1);
-        btnReceita.setLayoutParams(btnParams2);
 
         row.addView(btnGasto);
         row.addView(btnReceita);
         root.addView(row);
 
         // ===== BOTÃO QR CODE =====
-        btnQr = new Button(this);
-        btnQr.setText("📷 LER NOTA FISCAL (QR CODE)");
+        Button btnQr = new Button(this);
+        btnQr.setText("📷 Ler nota fiscal (QR Code)");
         btnQr.setBackgroundColor(Color.parseColor("#1976D2"));
         btnQr.setTextColor(Color.WHITE);
         root.addView(btnQr);
@@ -110,26 +100,19 @@ public class MainActivity extends Activity {
         });
 
         btnQr.setOnClickListener(v -> {
-            // FEEDBACK VISUAL
-            btnQr.setText("⏳ Aguardando leitura do QR Code...");
-            btnQr.setBackgroundColor(Color.parseColor("#9E9E9E"));
-            btnQr.setEnabled(false);
-
-            Intent i = new Intent(this, QrScanActivity.class);
-            startActivityForResult(i, REQUEST_QR);
+            if (PremiumManager.isPremium(this)) {
+                Intent i = new Intent(this, QrScanActivity.class);
+                startActivity(i);
+            } else {
+                Intent i = new Intent(this, PremiumActivity.class);
+                startActivity(i);
+            }
         });
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-
-        // ===== VOLTA DO QR =====
-        if (requestCode == REQUEST_QR) {
-            btnQr.setText("📷 LER NOTA FISCAL (QR CODE)");
-            btnQr.setBackgroundColor(Color.parseColor("#1976D2"));
-            btnQr.setEnabled(true);
-        }
 
         if (requestCode == REQUEST_ADD && resultCode == RESULT_OK && data != null) {
             double value = data.getDoubleExtra("value", 0);
@@ -151,46 +134,28 @@ public class MainActivity extends Activity {
         List<String> list = db.getAllTransactions();
 
         if (list.isEmpty()) {
-            TextView empty = new TextView(this);
-            empty.setText(
-                    "Nenhuma transação registrada\n\n" +
-                    "Use ➖ GASTO, ➕ RECEITA\n" +
-                    "ou 📷 QR Code"
-            );
-            empty.setGravity(Gravity.CENTER);
-            empty.setTextSize(16);
-            empty.setTextColor(Color.parseColor("#777777"));
-            empty.setPadding(0, 80, 0, 0);
-
-            listContainer.addView(empty);
+            TextView tv = new TextView(this);
+            tv.setText("Nenhuma transação ainda");
+            tv.setPadding(24, 24, 24, 24);
+            listContainer.addView(tv);
             return;
         }
 
         for (String item : list) {
-            LinearLayout card = new LinearLayout(this);
-            card.setOrientation(LinearLayout.VERTICAL);
-            card.setPadding(32, 24, 32, 24);
-            card.setBackgroundColor(Color.WHITE);
-
-            LinearLayout.LayoutParams cardParams =
-                    new LinearLayout.LayoutParams(
-                            LinearLayout.LayoutParams.MATCH_PARENT,
-                            LinearLayout.LayoutParams.WRAP_CONTENT);
-            cardParams.setMargins(0, 0, 0, 20);
-            card.setLayoutParams(cardParams);
-
             TextView tv = new TextView(this);
             tv.setText(item);
             tv.setTextSize(16);
+            tv.setPadding(24, 24, 24, 24);
+            tv.setBackgroundColor(Color.WHITE);
 
-            if (item.toLowerCase().contains("gasto")) {
-                tv.setTextColor(Color.parseColor("#D32F2F"));
-            } else if (item.toLowerCase().contains("receita")) {
-                tv.setTextColor(Color.parseColor("#388E3C"));
-            }
+            LinearLayout.LayoutParams p =
+                    new LinearLayout.LayoutParams(
+                            LinearLayout.LayoutParams.MATCH_PARENT,
+                            LinearLayout.LayoutParams.WRAP_CONTENT);
+            p.setMargins(0, 0, 0, 16);
+            tv.setLayoutParams(p);
 
-            card.addView(tv);
-            listContainer.addView(card);
+            listContainer.addView(tv);
         }
     }
 }
