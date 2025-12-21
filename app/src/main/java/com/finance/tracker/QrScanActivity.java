@@ -6,9 +6,8 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.journeyapps.barcodescanner.CaptureActivity;
-import com.journeyapps.barcodescanner.IntentIntegrator;
-import com.journeyapps.barcodescanner.IntentResult;
+import com.google.zxing.integration.android.IntentIntegrator;
+import com.google.zxing.integration.android.IntentResult;
 
 public class QrScanActivity extends Activity {
 
@@ -33,21 +32,13 @@ public class QrScanActivity extends Activity {
         if (result != null) {
             if (result.getContents() != null) {
 
-                String urlNota = result.getContents();
+                String url = result.getContents();
 
-                // Volta para o app com o LINK
-                Intent back = new Intent();
-                back.putExtra("note_url", urlNota);
-                setResult(RESULT_OK, back);
-                finish();
+                // Abre o site da SEFAZ
+                Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(url));
+                startActivity(browser);
 
-                // Abre a SEFAZ
-                try {
-                    Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(urlNota));
-                    startActivity(browser);
-                } catch (Exception e) {
-                    Toast.makeText(this, "Não foi possível abrir o site da nota", Toast.LENGTH_LONG).show();
-                }
+                finish(); // volta para o app depois
 
             } else {
                 Toast.makeText(this, "Leitura cancelada", Toast.LENGTH_SHORT).show();
