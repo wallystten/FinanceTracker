@@ -1,11 +1,9 @@
 package com.finance.tracker;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.zxing.integration.android.IntentIntegrator;
@@ -13,108 +11,51 @@ import com.google.zxing.integration.android.IntentResult;
 
 public class QrScanActivity extends Activity {
 
+    private DatabaseHelper db;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        db = new DatabaseHelper(this);
+
         IntentIntegrator integrator = new IntentIntegrator(this);
         integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
-        integrator.setPrompt("Aponte a câmera para o QR Code da nota fiscal");
-        integrator.setCameraId(0);
+        integrator.setPrompt("Escaneie o QR Code da Nota Fiscal");
         integrator.setBeepEnabled(true);
-        integrator.setBarcodeImageEnabled(false);
+        integrator.setOrientationLocked(true);
         integrator.initiateScan();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
         IntentResult result =
                 IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-        if (result != null) {
+        if (result != null && result.getContents() != null) {
 
-            if (result.getContents() == null) {
-                finish();
-                return;
-            }
+            String linkNota = result.getContents();
+            String estado = "SC"; // base atual
 
-            String qrUrl = result.getContents();
-            String estado = identificarEstado(qrUrl);
+            double valor = 0.0; // pode evoluir depois
 
-            Toast.makeText(
-                    this,
-                    "Nota fiscal detectada: " + estado,
-                    Toast.LENGTH_LONG
-            ).show();
+            db.addTransaction(
+                    valor,
+                    "expense",
+                    "Nota Fiscal - " + estado,
+                    "Nota Fiscal",
+                    linkNota
+            );
 
-            // Abre site da SEFAZ
-            Intent browserIntent =
-                    new Intent(Intent.ACTION_VIEW, Uri.parse(qrUrl));
-            startActivity(browserIntent);
-
-            // Pergunta o valor da nota
-            pedirValorNota(estado, qrUrl);
+            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(linkNota));
+            startActivity(i);
+            finish();
 
         } else {
-            super.onActivityResult(requestCode, resultCode, data);
+            Toast.makeText(this, "Leitura cancelada", Toast.LENGTH_SHORT).show();
+            finish();
         }
-    }
 
-    private void pedirValorNota(String estado, String linkNota) {
-
-        EditText input = new EditText(this);
-        input.setHint("Ex: 123,45");
-
-        new AlertDialog.Builder(this)
-                .setTitle("Registrar gasto")
-                .setMessage("Informe o valor da nota fiscal\n(" + estado + ")")
-                .setView(input)
-                .setCancelable(false)
-                .setPositiveButton("Salvar", (dialog, which) -> {
-
-                    String valorTexto = input.getText().toString()
-                            .replace(",", ".");
-
-                    try {
-                        double valor = Double.parseDouble(valorTexto);
-
-                        DatabaseHelper db = new DatabaseHelper(this);
-                        db.addTransaction(
-                                valor,
-                                "expense",
-                                "Nota Fiscal - " + estado,
-                                "Nota Fiscal"
-                        );
-
-                        Toast.makeText(
-                                this,
-                                "Gasto registrado com sucesso",
-                                Toast.LENGTH_LONG
-                        ).show();
-
-                        finish();
-
-                    } catch (Exception e) {
-                        Toast.makeText(
-                                this,
-                                "Valor inválido",
-                                Toast.LENGTH_LONG
-                        ).show();
-                        finish();
-                    }
-                })
-                .setNegativeButton("Cancelar", (dialog, which) -> finish())
-                .show();
-    }
-
-    private String identificarEstado(String url) {
-
-        if (url.contains("sef.sc.gov.br")) return "Santa Catarina";
-        if (url.contains("fazenda.sp.gov.br")) return "São Paulo";
-        if (url.contains("sefaz.pr.gov.br")) return "Paraná";
-        if (url.contains("sefaz.rs.gov.br")) return "Rio Grande do Sul";
-
-        return "Estado não identificado";
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }
