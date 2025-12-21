@@ -25,28 +25,44 @@ public class MainActivity extends Activity {
 
         db = new DatabaseHelper(this);
 
+        // ===== ROOT =====
         LinearLayout root = new LinearLayout(this);
         root.setOrientation(LinearLayout.VERTICAL);
         root.setPadding(32, 32, 32, 32);
         root.setBackgroundColor(Color.parseColor("#F2F2F2"));
 
-        // ===== CARD SALDO =====
+        // ===== CARD SALDO (MELHORADO) =====
         LinearLayout cardSaldo = new LinearLayout(this);
         cardSaldo.setOrientation(LinearLayout.VERTICAL);
-        cardSaldo.setPadding(40, 40, 40, 40);
+        cardSaldo.setPadding(48, 48, 48, 48);
         cardSaldo.setBackgroundColor(Color.WHITE);
 
-        txtSaldo = new TextView(this);
-        txtSaldo.setTextSize(24);
-        txtSaldo.setGravity(Gravity.CENTER);
+        LinearLayout.LayoutParams saldoParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+        saldoParams.setMargins(0, 0, 0, 48);
+        cardSaldo.setLayoutParams(saldoParams);
 
+        TextView lblSaldo = new TextView(this);
+        lblSaldo.setText("Saldo");
+        lblSaldo.setTextSize(16);
+        lblSaldo.setTextColor(Color.DKGRAY);
+        lblSaldo.setGravity(Gravity.CENTER);
+
+        txtSaldo = new TextView(this);
+        txtSaldo.setTextSize(32);
+        txtSaldo.setGravity(Gravity.CENTER);
+        txtSaldo.setPadding(0, 16, 0, 0);
+
+        cardSaldo.addView(lblSaldo);
         cardSaldo.addView(txtSaldo);
         root.addView(cardSaldo);
 
-        // ===== BOTÕES =====
+        // ===== BOTÕES GASTO / RECEITA =====
         LinearLayout row = new LinearLayout(this);
         row.setOrientation(LinearLayout.HORIZONTAL);
-        row.setPadding(0, 40, 0, 40);
+        row.setPadding(0, 0, 0, 40);
 
         Button btnGasto = new Button(this);
         btnGasto.setText("➖ Gasto");
@@ -58,6 +74,14 @@ public class MainActivity extends Activity {
         btnReceita.setBackgroundColor(Color.parseColor("#4CAF50"));
         btnReceita.setTextColor(Color.WHITE);
 
+        LinearLayout.LayoutParams btnParams =
+                new LinearLayout.LayoutParams(0,
+                        LinearLayout.LayoutParams.WRAP_CONTENT, 1);
+        btnParams.setMargins(8, 0, 8, 0);
+
+        btnGasto.setLayoutParams(btnParams);
+        btnReceita.setLayoutParams(btnParams);
+
         row.addView(btnGasto);
         row.addView(btnReceita);
         root.addView(row);
@@ -67,13 +91,21 @@ public class MainActivity extends Activity {
         btnQr.setText("📷 Ler nota fiscal (QR Code)");
         btnQr.setBackgroundColor(Color.parseColor("#1976D2"));
         btnQr.setTextColor(Color.WHITE);
+
+        LinearLayout.LayoutParams qrParams =
+                new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.MATCH_PARENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT);
+        qrParams.setMargins(0, 0, 0, 40);
+        btnQr.setLayoutParams(qrParams);
+
         root.addView(btnQr);
 
         // ===== TÍTULO HISTÓRICO =====
         TextView title = new TextView(this);
         title.setText("Histórico");
         title.setTextSize(18);
-        title.setPadding(0, 32, 0, 16);
+        title.setPadding(0, 16, 0, 16);
         root.addView(title);
 
         // ===== LISTA =====
@@ -121,8 +153,10 @@ public class MainActivity extends Activity {
 
     private void atualizarTela() {
         double saldo = db.getBalance();
-        txtSaldo.setText("Saldo\nR$ " + String.format("%.2f", saldo));
-        txtSaldo.setTextColor(saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED);
+        txtSaldo.setText("R$ " + String.format("%.2f", saldo));
+        txtSaldo.setTextColor(
+                saldo >= 0 ? Color.parseColor("#2E7D32") : Color.RED
+        );
 
         listContainer.removeAllViews();
         List<String> list = db.getAllTransactions();
@@ -130,6 +164,7 @@ public class MainActivity extends Activity {
         if (list.isEmpty()) {
             TextView tv = new TextView(this);
             tv.setText("Nenhuma transação ainda");
+            tv.setTextColor(Color.GRAY);
             listContainer.addView(tv);
             return;
         }
