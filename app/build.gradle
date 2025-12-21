@@ -4,12 +4,12 @@ plugins {
 
 android {
     namespace 'com.finance.tracker'
-    compileSdk 34
+    compileSdk 33
 
     defaultConfig {
         applicationId "com.finance.tracker"
         minSdk 21
-        targetSdk 34
+        targetSdk 33
         versionCode 1
         versionName "1.0"
     }
@@ -17,18 +17,25 @@ android {
     buildTypes {
         release {
             minifyEnabled false
+            proguardFiles getDefaultProguardFile(
+                    'proguard-android-optimize.txt'
+            ), 'proguard-rules.pro'
         }
     }
 
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
     }
 }
 
 dependencies {
-    implementation 'androidx.appcompat:appcompat:1.6.1'
 
-    // ✅ ZXing (QR Code interno, SEM app externo)
+    // ANDROID PADRÃO
+    implementation 'androidx.appcompat:appcompat:1.6.1'
+    implementation 'com.google.android.material:material:1.9.0'
+
+    // 🔹 ZXING (LEITOR QR FUNCIONAL)
     implementation 'com.journeyapps:zxing-android-embedded:4.3.0'
+    implementation 'com.google.zxing:core:3.5.1'
 }
