@@ -6,47 +6,55 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
+import com.journeyapps.barcodescanner.CaptureActivity;
+import com.journeyapps.barcodescanner.IntentIntegrator;
+import com.journeyapps.barcodescanner.IntentResult;
+
 public class QrScanActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Usa o leitor externo padrão do Android (estável)
-        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-
-        try {
-            startActivityForResult(intent, 1001);
-        } catch (Exception e) {
-            Toast.makeText(
-                    this,
-                    "Leitor de QR Code não encontrado. Instale um leitor.",
-                    Toast.LENGTH_LONG
-            ).show();
-            finish();
-        }
+        IntentIntegrator integrator = new IntentIntegrator(this);
+        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
+        integrator.setPrompt("Aponte a câmera para o QR Code da nota fiscal");
+        integrator.setCameraId(0);
+        integrator.setBeepEnabled(true);
+        integrator.setBarcodeImageEnabled(false);
+        integrator.initiateScan();
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+        IntentResult result =
+                IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
-            String qrContent = data.getStringExtra("SCAN_RESULT");
+        if (result != null) {
+            if (result.getContents() != null) {
 
-            if (qrContent != null && qrContent.startsWith("http")) {
-                Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
-                startActivity(browser);
+                String urlNota = result.getContents();
 
-                Toast.makeText(
-                        this,
-                        "Nota fiscal aberta. Extração automática será liberada no Premium.",
-                        Toast.LENGTH_LONG
-                ).show();
+                // Volta para o app com o LINK
+                Intent back = new Intent();
+                back.putExtra("note_url", urlNota);
+                setResult(RESULT_OK, back);
+                finish();
+
+                // Abre a SEFAZ
+                try {
+                    Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(urlNota));
+                    startActivity(browser);
+                } catch (Exception e) {
+                    Toast.makeText(this, "Não foi possível abrir o site da nota", Toast.LENGTH_LONG).show();
+                }
+
+            } else {
+                Toast.makeText(this, "Leitura cancelada", Toast.LENGTH_SHORT).show();
+                finish();
             }
+        } else {
+            super.onActivityResult(requestCode, resultCode, data);
         }
-
-        finish(); // volta para o app
     }
 }
