@@ -6,56 +6,47 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.widget.Toast;
 
-import com.google.zxing.integration.android.IntentIntegrator;
-import com.google.zxing.integration.android.IntentResult;
-
 public class QrScanActivity extends Activity {
 
-    private DatabaseHelper db;
+    private static final int REQUEST_QR_SCAN = 1001;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        db = new DatabaseHelper(this);
+        try {
+            // Intent padrão para leitura de QR Code
+            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+            startActivityForResult(intent, REQUEST_QR_SCAN);
 
-        IntentIntegrator integrator = new IntentIntegrator(this);
-        integrator.setDesiredBarcodeFormats(IntentIntegrator.QR_CODE);
-        integrator.setPrompt("Escaneie o QR Code da Nota Fiscal");
-        integrator.setBeepEnabled(true);
-        integrator.setOrientationLocked(true);
-        integrator.initiateScan();
+        } catch (Exception e) {
+            Toast.makeText(
+                    this,
+                    "Nenhum leitor de QR Code encontrado no dispositivo",
+                    Toast.LENGTH_LONG
+            ).show();
+            finish();
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        IntentResult result =
-                IntentIntegrator.parseActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
 
-        if (result != null && result.getContents() != null) {
+        if (requestCode == REQUEST_QR_SCAN && resultCode == RESULT_OK && data != null) {
+            String qrContent = data.getStringExtra("SCAN_RESULT");
 
-            String linkNota = result.getContents();
-            String estado = "SC"; // base atual
-
-            double valor = 0.0; // pode evoluir depois
-
-            db.addTransaction(
-                    valor,
-                    "expense",
-                    "Nota Fiscal - " + estado,
-                    "Nota Fiscal",
-                    linkNota
-            );
-
-            Intent i = new Intent(Intent.ACTION_VIEW, Uri.parse(linkNota));
-            startActivity(i);
-            finish();
-
-        } else {
-            Toast.makeText(this, "Leitura cancelada", Toast.LENGTH_SHORT).show();
-            finish();
+            if (qrContent != null && qrContent.startsWith("http")) {
+                // Abre o site da SEFAZ no navegador
+                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
+                startActivity(browserIntent);
+            } else {
+                Toast.makeText(this, "QR Code inválido", Toast.LENGTH_SHORT).show();
+            }
         }
 
-        super.onActivityResult(requestCode, resultCode, data);
+        // Sempre volta para o app
+        finish();
     }
 }
