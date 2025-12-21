@@ -11,99 +11,94 @@ import java.util.List;
 
 public class DatabaseHelper extends SQLiteOpenHelper {
 
-    private static final String DATABASE_NAME = "financas.db";
-    private static final int DATABASE_VERSION = 4; // ⬅️ aumentou
-
-    public static final String TABLE = "transactions";
+    private static final String DB_NAME = "finance.db";
+    private static final int DB_VERSION = 2;
 
     public DatabaseHelper(Context context) {
-        super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        super(context, DB_NAME, null, DB_VERSION);
     }
 
     @Override
     public void onCreate(SQLiteDatabase db) {
+
         db.execSQL(
-                "CREATE TABLE " + TABLE + " (" +
+                "CREATE TABLE transactions (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
                         "value REAL," +
                         "type TEXT," +
                         "bank TEXT," +
                         "category TEXT," +
-                        "note_url TEXT," + // ⬅️ NOVO
-                        "date INTEGER" +
+                        "note_link TEXT" +
                         ")"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        db.execSQL("DROP TABLE IF EXISTS " + TABLE);
+
+        db.execSQL("DROP TABLE IF EXISTS transactions");
         onCreate(db);
     }
 
-    // Salvar transação COM nota fiscal
-    public void addTransaction(double value, String type, String bank, String category, String noteUrl) {
+    public void addTransaction(
+            double value,
+            String type,
+            String bank,
+            String category,
+            String noteLink
+    ) {
+
         SQLiteDatabase db = getWritableDatabase();
+
         ContentValues cv = new ContentValues();
         cv.put("value", value);
         cv.put("type", type);
         cv.put("bank", bank);
         cv.put("category", category);
-        cv.put("note_url", noteUrl);
-        cv.put("date", System.currentTimeMillis());
-        db.insert(TABLE, null, cv);
-        db.close();
-    }
+        cv.put("note_link", noteLink);
 
-    // Compatibilidade antiga
-    public void addTransaction(double value, String type, String bank, String category) {
-        addTransaction(value, type, bank, category, null);
+        db.insert("transactions", null, cv);
     }
 
     public double getBalance() {
+
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.rawQuery(
-                "SELECT SUM(CASE WHEN type='income' THEN value ELSE -value END) FROM " + TABLE,
+                "SELECT SUM(CASE WHEN type='income' THEN value ELSE -value END) FROM transactions",
                 null
         );
+
         double total = 0;
-        if (c.moveToFirst()) total = c.getDouble(0);
+        if (c.moveToFirst()) {
+            total = c.getDouble(0);
+        }
         c.close();
-        db.close();
         return total;
     }
 
-    public List<String> getAllTransactions() {
-        List<String> list = new ArrayList<>();
+    public List<String[]> getAllTransactionsDetailed() {
+
+        List<String[]> list = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor c = db.rawQuery(
-                "SELECT value, type, bank, category, note_url FROM " + TABLE + " ORDER BY date DESC",
+                "SELECT value, type, bank, category, note_link FROM transactions ORDER BY id DESC",
                 null
         );
 
         while (c.moveToNext()) {
-            double value = c.getDouble(0);
-            String type = c.getString(1);
-            String bank = c.getString(2);
-            String category = c.getString(3);
-            String noteUrl = c.getString(4);
 
-            String line =
-                    (type.equals("income") ? "➕ " : "➖ ") +
-                    "R$ " + value +
-                    " • " + bank +
-                    " • " + category;
+            String[] item = new String[5];
+            item[0] = c.getString(0);
+            item[1] = c.getString(1);
+            item[2] = c.getString(2);
+            item[3] = c.getString(3);
+            item[4] = c.getString(4);
 
-            if (noteUrl != null) {
-                line += "\n📄 Nota fiscal salva";
-            }
-
-            list.add(line);
+            list.add(item);
         }
 
         c.close();
-        db.close();
         return list;
     }
 }
