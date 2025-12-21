@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <!-- Permissão da câmera -->
     <uses-permission android:name="android.permission.CAMERA"/>
 
     <application
@@ -11,7 +10,10 @@
         android:roundIcon="@mipmap/ic_launcher"
         android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <!-- Tela principal -->
+        <activity
+            android:name=".QrScanActivity"
+            android:exported="false"/>
+
         <activity
             android:name=".MainActivity"
             android:exported="true">
@@ -21,17 +23,10 @@
             </intent-filter>
         </activity>
 
-        <!-- Leitor de QR Code -->
-        <activity
-            android:name=".QrScanActivity"
-            android:exported="false"/>
-
-        <!-- Cadastro manual -->
         <activity
             android:name=".AddExpenseActivity"
             android:exported="false"/>
 
-        <!-- Tela Premium (futuro) -->
         <activity
             android:name=".PremiumActivity"
             android:exported="false"/>
