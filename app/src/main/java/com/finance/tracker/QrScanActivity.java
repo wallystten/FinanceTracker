@@ -12,15 +12,18 @@ public class QrScanActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        // Usa leitor externo (ZXing via Intent)
+        // Usa o leitor externo padrão do Android (estável)
+        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
+
         try {
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, 100);
+            startActivityForResult(intent, 1001);
         } catch (Exception e) {
-            Toast.makeText(this,
+            Toast.makeText(
+                    this,
                     "Leitor de QR Code não encontrado. Instale um leitor.",
-                    Toast.LENGTH_LONG).show();
+                    Toast.LENGTH_LONG
+            ).show();
             finish();
         }
     }
@@ -29,30 +32,21 @@ public class QrScanActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
+        if (requestCode == 1001 && resultCode == RESULT_OK && data != null) {
             String qrContent = data.getStringExtra("SCAN_RESULT");
 
             if (qrContent != null && qrContent.startsWith("http")) {
-
-                // 🔹 REGISTRA GASTO AUTOMATICAMENTE
-                DatabaseHelper db = new DatabaseHelper(this);
-                db.addTransaction(
-                        0.0,                 // valor provisório
-                        "expense",            // tipo
-                        "Nota Fiscal",        // banco
-                        "Alimentação"         // categoria
-                );
-
-                // 🔹 ABRE SITE DA SEFAZ
                 Intent browser = new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
                 startActivity(browser);
 
-                Toast.makeText(this,
-                        "Nota fiscal registrada. Edite o valor depois.",
-                        Toast.LENGTH_LONG).show();
+                Toast.makeText(
+                        this,
+                        "Nota fiscal aberta. Extração automática será liberada no Premium.",
+                        Toast.LENGTH_LONG
+                ).show();
             }
         }
 
-        finish();
+        finish(); // volta para o app
     }
 }
