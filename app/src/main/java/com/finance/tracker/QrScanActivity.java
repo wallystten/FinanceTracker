@@ -8,24 +8,20 @@ import android.widget.Toast;
 
 public class QrScanActivity extends Activity {
 
-    private static final int REQUEST_QR_SCAN = 1001;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        try {
-            // Intent padrão para leitura de QR Code
-            Intent intent = new Intent("com.google.zxing.client.android.SCAN");
-            intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
-            startActivityForResult(intent, REQUEST_QR_SCAN);
+        // Usa leitor externo padrão (câmera do sistema)
+        Intent intent = new Intent("com.google.zxing.client.android.SCAN");
+        intent.putExtra("SCAN_MODE", "QR_CODE_MODE");
 
+        try {
+            startActivityForResult(intent, 100);
         } catch (Exception e) {
-            Toast.makeText(
-                    this,
-                    "Nenhum leitor de QR Code encontrado no dispositivo",
-                    Toast.LENGTH_LONG
-            ).show();
+            Toast.makeText(this,
+                    "Leitor de QR Code não encontrado",
+                    Toast.LENGTH_LONG).show();
             finish();
         }
     }
@@ -34,19 +30,45 @@ public class QrScanActivity extends Activity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (requestCode == REQUEST_QR_SCAN && resultCode == RESULT_OK && data != null) {
+        if (requestCode == 100 && resultCode == RESULT_OK && data != null) {
             String qrContent = data.getStringExtra("SCAN_RESULT");
 
-            if (qrContent != null && qrContent.startsWith("http")) {
-                // Abre o site da SEFAZ no navegador
-                Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
-                startActivity(browserIntent);
-            } else {
-                Toast.makeText(this, "QR Code inválido", Toast.LENGTH_SHORT).show();
+            if (qrContent == null) {
+                finish();
+                return;
             }
-        }
 
-        // Sempre volta para o app
-        finish();
+            // ✅ VALIDA SEFAZ SC
+            if (!qrContent.contains("sef.sc.gov.br")) {
+                Toast.makeText(this,
+                        "Nota não pertence à SEFAZ SC",
+                        Toast.LENGTH_LONG).show();
+                finish();
+                return;
+            }
+
+            // ✅ SALVA NO BANCO COMO PENDENTE
+            DatabaseHelper db = new DatabaseHelper(this);
+            db.addTransaction(
+                    0.0,
+                    "expense",
+                    "SEFAZ SC",
+                    "Nota fiscal",
+                    "pendente"
+            );
+
+            Toast.makeText(this,
+                    "Nota fiscal registrada (pendente)",
+                    Toast.LENGTH_LONG).show();
+
+            // ✅ ABRE A SEFAZ
+            Intent browserIntent =
+                    new Intent(Intent.ACTION_VIEW, Uri.parse(qrContent));
+            startActivity(browserIntent);
+
+            finish();
+        } else {
+            finish();
+        }
     }
 }
