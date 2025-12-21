@@ -20,7 +20,6 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-
         db.execSQL(
                 "CREATE TABLE transactions (" +
                         "id INTEGER PRIMARY KEY AUTOINCREMENT," +
@@ -28,74 +27,78 @@ public class DatabaseHelper extends SQLiteOpenHelper {
                         "type TEXT," +
                         "bank TEXT," +
                         "category TEXT," +
-                        "note_link TEXT" +
-                        ")"
+                        "status TEXT)"
         );
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-
         db.execSQL("DROP TABLE IF EXISTS transactions");
         onCreate(db);
     }
 
+    // ✅ MÉTODO PADRÃO (AGORA COM STATUS)
     public void addTransaction(
             double value,
             String type,
             String bank,
             String category,
-            String noteLink
+            String status
     ) {
-
         SQLiteDatabase db = getWritableDatabase();
-
         ContentValues cv = new ContentValues();
+
         cv.put("value", value);
         cv.put("type", type);
         cv.put("bank", bank);
         cv.put("category", category);
-        cv.put("note_link", noteLink);
+        cv.put("status", status);
 
         db.insert("transactions", null, cv);
     }
 
     public double getBalance() {
-
         SQLiteDatabase db = getReadableDatabase();
         Cursor c = db.rawQuery(
-                "SELECT SUM(CASE WHEN type='income' THEN value ELSE -value END) FROM transactions",
-                null
-        );
+                "SELECT value, type FROM transactions", null);
 
-        double total = 0;
-        if (c.moveToFirst()) {
-            total = c.getDouble(0);
+        double balance = 0;
+
+        while (c.moveToNext()) {
+            double value = c.getDouble(0);
+            String type = c.getString(1);
+
+            if ("income".equals(type)) {
+                balance += value;
+            } else {
+                balance -= value;
+            }
         }
+
         c.close();
-        return total;
+        return balance;
     }
 
-    public List<String[]> getAllTransactionsDetailed() {
-
-        List<String[]> list = new ArrayList<>();
+    public List<String> getAllTransactions() {
+        List<String> list = new ArrayList<>();
         SQLiteDatabase db = getReadableDatabase();
 
         Cursor c = db.rawQuery(
-                "SELECT value, type, bank, category, note_link FROM transactions ORDER BY id DESC",
+                "SELECT value, bank, category, status FROM transactions ORDER BY id DESC",
                 null
         );
 
         while (c.moveToNext()) {
+            double value = c.getDouble(0);
+            String bank = c.getString(1);
+            String category = c.getString(2);
+            String status = c.getString(3);
 
-            String[] item = new String[5];
-            item[0] = c.getString(0);
-            item[1] = c.getString(1);
-            item[2] = c.getString(2);
-            item[3] = c.getString(3);
-            item[4] = c.getString(4);
-
-            list.add(item);
+            if ("pendente".equals(status)) {
+                list.add("Nota fiscal (pendente) - " + bank);
+            } else {
+                list.add("R$ " + value + " - " + bank + " (" + category + ")");
+            }
         }
 
         c.close();
